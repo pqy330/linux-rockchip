@@ -16,7 +16,7 @@
 #include <linux/of.h>
 #include <linux/of_address.h>
 #include <linux/syscore_ops.h>
-//#include <dt-bindings/clock/rk3368-cru.h>
+#include <dt-bindings/clock/rk3368-cru.h>
 #include "clk.h"
 
 #define RK3368_GRF_SOC_STATUS0	0x480
@@ -25,9 +25,14 @@ enum rk3368_plls {
 	apllb, aplll, dpll, cpll, gpll, npll,
 };
 
-static struct rockchip_pll_rate_table rk3288_pll_rates[] = {
-	{ /* sentinel */ },
-};
+//static struct rockchip_pll_rate_table rk3368_pll_rates[] = {
+//	{ /* sentinel */ },
+//};
+#define rk3368_pll_rates NULL
+
+
+PNAME(mux_pll_p)		= { "xin24m", "xin32k" };
+
 
 static struct rockchip_pll_clock rk3368_pll_clks[] __initdata = {
 	[apllb] = PLL(pll_rk3066, PLL_APLLB, "apllb", mux_pll_p, 0, RK3368_PLL_CON(0),
