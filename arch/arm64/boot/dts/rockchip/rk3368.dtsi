@@ -54,78 +54,297 @@
 	#address-cells = <2>;
 	#size-cells = <2>;
 
-	cpus {
-		#address-cells = <1>;
-		#size-cells = <0>;
 
-/*		cpu-map {
+	cpus {
+		#address-cells = <0x2>;
+		#size-cells = <0x0>;
+
+// convert to
+// #address-cells = <1>;
+// and adapt addresses?
+
+		cpu-map {
 			cluster0 {
+				core0 {
+					cpu = <&cpu4>;
+				};
+				core1 {
+					cpu = <&cpu5>;
+				};
+				core2 {
+					cpu = <&cpu6>;
+				};
+				core3 {
+					cpu = <&cpu7>;
+				};
+			};
+
+			cluster1 {
 				core0 {
 					cpu = <&cpu0>;
 				};
 				core1 {
 					cpu = <&cpu1>;
 				};
-			};
-
-			cluster1 {
-				core0 {
+				core2 {
 					cpu = <&cpu2>;
 				};
-				core1 {
+				core3 {
 					cpu = <&cpu3>;
 				};
 			};
-		};*/
+		};
 
+/*		idle-states {
+			entry-method = "arm,psci";
+
+			cpu-sleep-0 {
+				compatible = "arm,idle-state";
+				arm,psci-suspend-param = <0x1010000>;
+				entry-latency-us = <0x3fffffff>;
+				exit-latency-us = <0x40000000>;
+				min-residency-us = <0xffffffff>;
+				linux,phandle = <0x69>;
+				phandle = <0x69>;
+			};
+		};
+*/
 		cpu0: cpu@0 {
 			device_type = "cpu";
-			compatible = "arm,cortex-a53";
-			reg = <0x000>;
+			compatible = "arm,cortex-a53", "arm,armv8";
+			reg = <0x0 0x0>;
+			enable-method = "psci";
+//			cpu-idle-states = <0x69>;
 		};
-/*
+
 		cpu1: cpu@1 {
 			device_type = "cpu";
-			compatible = "arm,cortex-a53";
-			reg = <0x001>;
+			compatible = "arm,cortex-a53", "arm,armv8";
+			reg = <0x0 0x1>;
 			enable-method = "psci";
+//			cpu-idle-states = <0x69>;
 		};
 
-		cpu2: cpu@100 {
+		cpu2: cpu@2 {
 			device_type = "cpu";
-			compatible = "arm,cortex-a57";
-			reg = <0x100>;
+			compatible = "arm,cortex-a53", "arm,armv8";
+			reg = <0x0 0x2>;
 			enable-method = "psci";
+//			cpu-idle-states = <0x69>;
 		};
 
-		cpu3: cpu@101 {
+		cpu3: cpu@3 {
 			device_type = "cpu";
-			compatible = "arm,cortex-a57";
-			reg = <0x101>;
+			compatible = "arm,cortex-a53", "arm,armv8";
+			reg = <0x0 0x3>;
 			enable-method = "psci";
+//			cpu-idle-states = <0x69>;
 		};
-	};*/
 
-/*	psci {
-		compatible = "arm,psci";
+		cpu4: cpu@100 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a53", "arm,armv8";
+			reg = <0x0 0x100>;
+			enable-method = "psci";
+//			cpu-idle-states = <0x69>;
+		};
+
+		cpu5: cpu@101 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a53", "arm,armv8";
+			reg = <0x0 0x101>;
+			enable-method = "psci";
+//			cpu-idle-states = <0x69>;
+		};
+
+		cpu6: cpu@102 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a53", "arm,armv8";
+			reg = <0x0 0x102>;
+			enable-method = "psci";
+//			cpu-idle-states = <0x69>;
+		};
+
+		cpu7: cpu@103 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a53", "arm,armv8";
+			reg = <0x0 0x103>;
+			enable-method = "psci";
+//			cpu-idle-states = <0x69>;
+		};
+	};
+
+	arm-pmu {
+		compatible = "arm,armv8-pmuv3";
+		interrupts = <GIC_SPI 112 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 113 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 114 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 115 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 116 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 117 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 118 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 119 IRQ_TYPE_LEVEL_HIGH>;
+	};
+
+	psci {
+		compatible = "arm,psci-0.2";
 		method = "smc";
-		cpu_suspend   = <0x84000001>;
-		cpu_off	      = <0x84000002>;
-		cpu_on	      = <0x84000003>;
-	};*/
+	};
 
 	timer {
 		compatible = "arm,armv8-timer";
-		interrupt-parent = <&gic>;
 		interrupts = <GIC_PPI 13
-			(GIC_CPU_MASK_SIMPLE(8) | IRQ_TYPE_LEVEL_LOW)>,
+			(GIC_CPU_MASK_SIMPLE(8) | IRQ_TYPE_LEVEL_HIGH)>,
 			     <GIC_PPI 14
-			(GIC_CPU_MASK_SIMPLE(8) | IRQ_TYPE_LEVEL_LOW)>,
+			(GIC_CPU_MASK_SIMPLE(8) | IRQ_TYPE_LEVEL_HIGH)>,
 			     <GIC_PPI 11
-			(GIC_CPU_MASK_SIMPLE(8) | IRQ_TYPE_LEVEL_LOW)>,
+			(GIC_CPU_MASK_SIMPLE(8) | IRQ_TYPE_LEVEL_HIGH)>,
 			     <GIC_PPI 10
-			(GIC_CPU_MASK_SIMPLE(8) | IRQ_TYPE_LEVEL_LOW)>;
+			(GIC_CPU_MASK_SIMPLE(8) | IRQ_TYPE_LEVEL_HIGH)>;
 	};
+
+	xin24m: oscillator {
+		compatible = "fixed-clock";
+		clock-frequency = <24000000>;
+		clock-output-names = "xin24m";
+		#clock-cells = <0>;
+	};
+
+
+	uart0: serial@ff180000 {
+		compatible = "rockchip,rk3368-uart", "snps,dw-apb-uart";
+		reg = <0x0 0xff180000 0x0 0x100>;
+		clock-frequency = <24000000>;
+//		clocks = <&cru SCLK_UART0>, <&cru PCLK_UART0>;
+//		clock-names = "baudclk", "apb_pclk";
+		interrupts = <GIC_SPI 55 IRQ_TYPE_LEVEL_HIGH>;
+//		pinctrl-names = "default";
+//		pinctrl-0 = <0x97 0x98>;
+		reg-shift = <2>;
+		reg-io-width = <4>;
+		status = "disabled";
+	};
+
+	uart1: serial@ff190000 {
+		compatible = "rockchip,rk3368-uart", "snps,dw-apb-uart";
+		reg = <0x0 0xff190000 0x0 0x100>;
+		clock-frequency = <24000000>;
+//		clocks = <&cru SCLK_UART1>, <&cru PCLK_UART1>;
+//		clock-names = "baudclk", "apb_pclk";
+		interrupts = <GIC_SPI 56 IRQ_TYPE_LEVEL_HIGH>;
+		reg-shift = <2>;
+		reg-io-width = <4>;
+		pinctrl-names = "default";
+		pinctrl-0 = <0x9a 0x9b 0x9c>;
+		status = "disabled";
+	};
+
+	uart3: serial@ff1b0000 {
+		compatible = "rockchip,rk3368-uart", "snps,dw-apb-uart";
+		reg = <0x0 0xff1b0000 0x0 0x100>;
+		clock-frequency = <24000000>;
+//		clocks = <&cru SCLK_UART3>, <&cru PCLK_UART3>;
+//		clock-names = "baudclk", "apb_pclk";
+//		current-speed = <0x1c200>;
+		interrupts = <GIC_SPI 58 IRQ_TYPE_LEVEL_HIGH>;
+		reg-shift = <2>;
+		reg-io-width = <4>;
+		pinctrl-names = "default";
+		pinctrl-0 = <0xa0 0xa1 0xa2>;
+		status = "disabled";
+	};
+
+	uart4: serial@ff1c0000 {
+		compatible = "rockchip,rk3368-uart", "snps,dw-apb-uart";
+		reg = <0x0 0xff1c0000 0x0 0x100>;
+		clock-frequency = <24000000>;
+//		clocks = <&cru SCLK_UART4>, <&cru PCLK_UART4>;
+//		clock-names = "baudclk", "apb_pclk";
+		interrupts = <GIC_SPI 59 IRQ_TYPE_LEVEL_HIGH>;
+		reg-shift = <2>;
+		reg-io-width = <4>;
+//		pinctrl-names = "default";
+//		pinctrl-0 = <0xa4 0xa5 0xa6>;
+		status = "disabled";
+	};
+
+	usb_host0_ehci: usb@ff500000 {
+		compatible = "generic-ehci";
+		reg = <0x0 0xff500000 0x0 0x100>;
+		interrupts = <GIC_SPI 24 IRQ_TYPE_LEVEL_HIGH>;
+//		clocks = <&cru HCLK_USBHOST0>;
+//		clock-names = "usbhost";
+//		phys = <&usbphy1>;
+//		phy-names = "usb";
+		status = "disabled";
+	};
+
+	/* FIXME: does ohci actually work? It didn't on the rk3288 */
+	usb_host0_ohci: usb@ff520000 {
+		compatible = "generic-ohci";
+		reg = <0x0 0xff520000 0x0 0x20000>;
+		interrupts = <GIC_SPI 25 IRQ_TYPE_LEVEL_HIGH>;
+//		clocks = <&cru HCLK_USBHOST0>;
+//		clock-names = "usbhost";
+//		phys = <&usbphy1>;
+//		phy-names = "usb";
+		status = "disabled";
+	};
+
+	usb_otg: usb@ff580000 {
+		compatible = "rockchip,rk3288-usb", "rockchip,rk3066-usb",
+				"snps,dwc2";
+		reg = <0x0 0xff580000 0x0 0x40000>;
+		interrupts = <GIC_SPI 23 IRQ_TYPE_LEVEL_HIGH>;
+//		clocks = <&cru HCLK_OTG0>;
+//		clock-names = "otg";
+		dr_mode = "otg";
+		/* FIXME: are fifo sizes the same as on rk3288? */
+		g-np-tx-fifo-size = <16>;
+		g-rx-fifo-size = <275>;
+		g-tx-fifo-size = <256 128 128 64 64 32>;
+		g-use-dma;
+//		phys = <&usbphy0>;
+//		phy-names = "usb2-phy";
+		status = "disabled";
+	};
+
+	uart2: serial@ff690000 { /* UART_DBG */
+		compatible = "rockchip,rk3368-uart", "snps,dw-apb-uart";
+		reg = <0x0 0xff690000 0x0 0x100>;
+		clock-frequency = <24000000>;
+//		clocks = <&cru SCLK_UART2>, <&cru PCLK_UART2>;
+//		clock-names = "baudclk", "apb_pclk";
+		interrupts = <GIC_SPI 57 IRQ_TYPE_LEVEL_HIGH>;
+		reg-shift = <2>;
+		reg-io-width = <4>;
+		status = "disabled";
+	};
+
+	cru: clock-controller@ff760000 {
+		compatible = "rockchip,rk3368-cru";
+		reg = <0x0 0xff760000 0x0 0x1000>;
+		rockchip,grf = <&grf>;
+		#clock-cells = <1>;
+		#reset-cells = <1>;
+/*		assigned-clocks = <&cru PLL_GPLL>, <&cru PLL_CPLL>,
+				  <&cru PLL_NPLL>, <&cru ACLK_CPU>,
+				  <&cru HCLK_CPU>, <&cru PCLK_CPU>,
+				  <&cru ACLK_PERI>, <&cru HCLK_PERI>,
+				  <&cru PCLK_PERI>;
+		assigned-clock-rates = <594000000>, <400000000>,
+				       <500000000>, <300000000>,
+				       <150000000>, <75000000>,
+				       <300000000>, <150000000>,
+				       <75000000>;*/
+	};
+
+	grf: syscon@ff770000 {
+		compatible = "rockchip,rk3368-grf", "syscon";
+		reg = <0x0 0xff770000 0x0 0x1000>;
+	};
+
+
 
 	gic: interrupt-controller@ffb71000 {
 		compatible = "arm,gic-400";
