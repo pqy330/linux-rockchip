@@ -199,6 +199,13 @@ struct clk *rockchip_clk_register_mmc(const char *name,
 				const char **parent_names, u8 num_parents,
 				void __iomem *reg, int shift);
 
+#define ROCKCHIP_INVERTER_HIWORD_MASK	BIT(0)
+
+struct clk *rockchip_clk_register_inverter(const char *name,
+				const char **parent_names, u8 num_parents,
+				void __iomem *reg, int shift, int flags,
+				spinlock_t *lock);
+
 #define PNAME(x) static const char *x[] __initdata
 
 enum rockchip_clk_branch_type {
@@ -208,6 +215,7 @@ enum rockchip_clk_branch_type {
 	branch_fraction_divider,
 	branch_gate,
 	branch_mmc,
+	branch_inverter,
 };
 
 struct rockchip_clk_branch {
@@ -429,6 +437,18 @@ struct rockchip_clk_branch {
 		.num_parents	= 1,				\
 		.muxdiv_offset	= offset,			\
 		.div_shift	= shift,			\
+	}
+
+#define INVERTER(_id, cname, pname, io, is, if)			\
+	{							\
+		.id		= _id,				\
+		.branch_type	= branch_inverter,		\
+		.name		= cname,			\
+		.parent_names	= (const char *[]){ pname },	\
+		.num_parents	= 1,				\
+		.muxdiv_offset	= io,				\
+		.div_shift	= is,				\
+		.div_flags	= if,				\
 	}
 
 void rockchip_clk_init(struct device_node *np, void __iomem *base,
