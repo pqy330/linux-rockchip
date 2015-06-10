@@ -19,30 +19,28 @@
 #define PLL_CPLL		4
 #define PLL_GPLL		5
 #define PLL_NPLL		6
-//#define ARMCLK			6
+#define ARMCLKB			7
+#define ARMCLKL			8
 
 /* sclk gates (special clocks) */
-/*#define SCLK_GPU		64*/
+#define SCLK_GPU_CORE		64
 #define SCLK_SPI0		65
 #define SCLK_SPI1		66
 #define SCLK_SPI2		67
 #define SCLK_SDMMC		68
 #define SCLK_SDIO0		69
-//#define SCLK_SDIO1		70
 #define SCLK_EMMC		71
 #define SCLK_TSADC		72
 #define SCLK_SARADC		73
-/*#define SCLK_PS2C		74*/
 #define SCLK_NANDC0		75
-/*#define SCLK_NANDC1		76*/
 #define SCLK_UART0		77
 #define SCLK_UART1		78
 #define SCLK_UART2		79
 #define SCLK_UART3		80
 #define SCLK_UART4		81
-/*#define SCLK_I2S0		82
-#define SCLK_SPDIF		83
-#define SCLK_SPDIF8CH		84
+#define SCLK_I2S_8CH		82
+#define SCLK_SPDIF_8CH		83
+#define SCLK_I2S_2CH		84
 #define SCLK_TIMER0		85
 #define SCLK_TIMER1		86
 #define SCLK_TIMER2		87
@@ -52,65 +50,58 @@
 #define SCLK_TIMER6		91
 #define SCLK_HSADC		92*/
 #define SCLK_OTGPHY0		93
-/*#define SCLK_OTGPHY1		94
-#define SCLK_OTGPHY2		95*/
 #define SCLK_OTG_ADP		96
-/*#define SCLK_HSICPHY480M	97
-#define SCLK_HSICPHY12M		98 */
+#define SCLK_HSICPHY480M	97
+#define SCLK_HSICPHY12M		98 
 #define SCLK_MACREF		99
 #define SCLK_VOP0_PWM		100
-//#define SCLK_LCDC_PWM1		101
 #define SCLK_MAC_RX		102
 #define SCLK_MAC_TX		103
-/*#define SCLK_EDP_24M		104
+#define SCLK_EDP_24M		104
 #define SCLK_EDP		105
 #define SCLK_RGA		106
 #define SCLK_ISP		107
-#define SCLK_ISP_JPE		108 */
+#define SCLK_HDCP		108
 #define SCLK_HDMI_HDCP		109
 #define SCLK_HDMI_CEC		110
-/*#define SCLK_HEVC_CABAC		111
+#define SCLK_HEVC_CABAC		111
 #define SCLK_HEVC_CORE		112
-#define SCLK_I2S0_OUT		113 */
+#define SCLK_I2S_8CH_OUT	113
 #define SCLK_SDMMC_DRV		114
 #define SCLK_SDIO0_DRV		115
-//#define SCLK_SDIO1_DRV		116
 #define SCLK_EMMC_DRV		117
 #define SCLK_SDMMC_SAMPLE	118
 #define SCLK_SDIO0_SAMPLE	119
-//#define SCLK_SDIO1_SAMPLE	120
 #define SCLK_EMMC_SAMPLE	121
-/*#define SCLK_USBPHY480M_SRC	122
+#define SCLK_USBPHY480M		122
 #define SCLK_PVTM_CORE		123
-#define SCLK_PVTM_GPU		124*/
+#define SCLK_PVTM_GPU		124
+#define SCLK_SFC		125
 
 #define SCLK_MAC		151
 #define SCLK_MACREF_OUT		152
-
-//FIXME: einordnen
-#define SCLK_SFC		160
 
 #define DCLK_VOP0		190
 #define MCLK_CRYPTO		191
 
 /* aclk gates */
-/*#define ACLK_GPU		192*/
+#define ACLK_GPU_MEM		192
 #define ACLK_DMAC_BUS		193
 #define ACLK_DMAC_PERI		194
 #define ACLK_PERI_MMU		195
 #define ACLK_GMAC		196
-/*#define ACLK_VOP0		197
-#define ACLK_VOP1		198
-#define ACLK_CRYPTO		199
+#define ACLK_VOP		197
+#define ACLK_VOP_IEP		198
+//#define ACLK_CRYPTO		199*/
 #define ACLK_RGA		200
-#define ACLK_RGA_NIU		201
+#define ACLK_HDCP		201
 #define ACLK_IEP		202
-#define ACLK_VIO0_NIU		203
+#define ACLK_VIO0_NOC		203
 #define ACLK_VIP		204
 #define ACLK_ISP		205
-#define ACLK_VIO1_NIU		206
-#define ACLK_HEVC		207
-#define ACLK_VCODEC		208*/
+#define ACLK_VIO1_NOC		206
+//#define ACLK_HEVC		207
+#define ACLK_VIDEO		208
 #define ACLK_BUS		209
 #define ACLK_PERI		210
 
@@ -149,21 +140,21 @@
 #define PCLK_TIMER0		353
 #define PCLK_TIMER1		354 // FIXME ordering
 
-/*#define PCLK_TZPC		354
+/*#define PCLK_TZPC		354 */
 #define PCLK_EDP_CTRL		355
 #define PCLK_MIPI_DSI0		356
-#define PCLK_MIPI_DSI1		357
+//#define PCLK_MIPI_DSI1		357 */
 #define PCLK_MIPI_CSI		358
-#define PCLK_LVDS_PHY		359
+#define PCLK_HDCP		359
 #define PCLK_HDMI_CTRL		360
-#define PCLK_VIO2_H2P		361*/
+#define PCLK_VIO_H2P		361
 #define PCLK_BUS		362
 #define PCLK_PERI		363
 #define PCLK_DDRUPCTL		364
 #define PCLK_DDRPHY		365
-/*#define PCLK_DDRUPCTL1		366
-#define PCLK_PUBL1		367
-#define PCLK_WDT		368*/
+#define PCLK_ISP		366
+#define PCLK_VIP		367
+//#define PCLK_WDT		368*/
 
 /* hclk gates */
 //#define HCLK_GPS		448
@@ -183,18 +174,18 @@
 #define HCLK_I2S_2CH		462
 #define HCLK_I2S_8CH		463
 #define HCLK_SPDIF		464
-//#define HCLK_VOP0		465
+#define HCLK_VOP		465
 //#define HCLK_VOP1		466
 #define HCLK_ROM		467
-/*#define HCLK_IEP		468
+#define HCLK_IEP		468
 #define HCLK_ISP		469
 #define HCLK_RGA		470
 #define HCLK_VIO_AHB_ARBI	471
-#define HCLK_VIO_NIU		472
+#define HCLK_VIO_NOC		472
 #define HCLK_VIP		473
-#define HCLK_VIO2_H2P		474
-#define HCLK_HEVC		475
-#define HCLK_VCODEC		476*/
+#define HCLK_VIO_H2P		474
+#define HCLK_VIO_HDCPMMU	475
+#define HCLK_VIDEO		476
 #define HCLK_BUS		477
 #define HCLK_PERI		478
 
