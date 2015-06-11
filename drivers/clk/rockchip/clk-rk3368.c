@@ -15,7 +15,7 @@
 #include <linux/clk-provider.h>
 #include <linux/of.h>
 #include <linux/of_address.h>
-#include <linux/syscore_ops.h>
+#include <linux/platform_device.h>
 #include <dt-bindings/clock/rk3368-cru.h>
 #include "clk.h"
 
@@ -25,11 +25,75 @@ enum rk3368_plls {
 	apllb, aplll, dpll, cpll, gpll, npll,
 };
 
-//static struct rockchip_pll_rate_table rk3368_pll_rates[] = {
-//	{ /* sentinel */ },
-//};
-#define rk3368_pll_rates NULL
-
+static struct rockchip_pll_rate_table rk3368_pll_rates[] = {
+	RK3066_PLL_RATE(2208000000, 1, 92, 1),
+	RK3066_PLL_RATE(2184000000, 1, 91, 1),
+	RK3066_PLL_RATE(2160000000, 1, 90, 1),
+	RK3066_PLL_RATE(2136000000, 1, 89, 1),
+	RK3066_PLL_RATE(2112000000, 1, 88, 1),
+	RK3066_PLL_RATE(2088000000, 1, 87, 1),
+	RK3066_PLL_RATE(2064000000, 1, 86, 1),
+	RK3066_PLL_RATE(2040000000, 1, 85, 1),
+	RK3066_PLL_RATE(2016000000, 1, 84, 1),
+	RK3066_PLL_RATE(1992000000, 1, 83, 1),
+	RK3066_PLL_RATE(1968000000, 1, 82, 1),
+	RK3066_PLL_RATE(1944000000, 1, 81, 1),
+	RK3066_PLL_RATE(1920000000, 1, 80, 1),
+	RK3066_PLL_RATE(1896000000, 1, 79, 1),
+	RK3066_PLL_RATE(1872000000, 1, 78, 1),
+	RK3066_PLL_RATE(1848000000, 1, 77, 1),
+	RK3066_PLL_RATE(1824000000, 1, 76, 1),
+	RK3066_PLL_RATE(1800000000, 1, 75, 1),
+	RK3066_PLL_RATE(1776000000, 1, 74, 1),
+	RK3066_PLL_RATE(1752000000, 1, 73, 1),
+	RK3066_PLL_RATE(1728000000, 1, 72, 1),
+	RK3066_PLL_RATE(1704000000, 1, 71, 1),
+	RK3066_PLL_RATE(1680000000, 1, 70, 1),
+	RK3066_PLL_RATE(1656000000, 1, 69, 1),
+	RK3066_PLL_RATE(1632000000, 1, 68, 1),
+	RK3066_PLL_RATE(1608000000, 1, 67, 1),
+	RK3066_PLL_RATE(1560000000, 1, 65, 1),
+	RK3066_PLL_RATE(1512000000, 1, 63, 1),
+	RK3066_PLL_RATE(1488000000, 1, 62, 1),
+	RK3066_PLL_RATE(1464000000, 1, 61, 1),
+	RK3066_PLL_RATE(1440000000, 1, 60, 1),
+	RK3066_PLL_RATE(1416000000, 1, 59, 1),
+	RK3066_PLL_RATE(1392000000, 1, 58, 1),
+	RK3066_PLL_RATE(1368000000, 1, 57, 1),
+	RK3066_PLL_RATE(1344000000, 1, 56, 1),
+	RK3066_PLL_RATE(1320000000, 1, 55, 1),
+	RK3066_PLL_RATE(1296000000, 1, 54, 1),
+	RK3066_PLL_RATE(1272000000, 1, 53, 1),
+	RK3066_PLL_RATE(1248000000, 1, 52, 1),
+	RK3066_PLL_RATE(1224000000, 1, 51, 1),
+	RK3066_PLL_RATE(1200000000, 1, 50, 1),
+	RK3066_PLL_RATE(1176000000, 1, 49, 1),
+	RK3066_PLL_RATE(1128000000, 1, 47, 1),
+	RK3066_PLL_RATE(1104000000, 1, 46, 1),
+	RK3066_PLL_RATE(1008000000, 1, 84, 2),
+	RK3066_PLL_RATE( 912000000, 1, 76, 2),
+	RK3066_PLL_RATE( 888000000, 1, 74, 2),
+	RK3066_PLL_RATE( 816000000, 1, 68, 2),
+	RK3066_PLL_RATE( 792000000, 1, 66, 2),
+	RK3066_PLL_RATE( 696000000, 1, 58, 2),
+	RK3066_PLL_RATE( 672000000, 1, 56, 2),
+	RK3066_PLL_RATE( 648000000, 1, 54, 2),
+	RK3066_PLL_RATE( 624000000, 1, 52, 2),
+	RK3066_PLL_RATE( 600000000, 1, 50, 2),
+	RK3066_PLL_RATE( 576000000, 1, 48, 2),
+	RK3066_PLL_RATE( 552000000, 1, 46, 2),
+	RK3066_PLL_RATE( 528000000, 1, 88, 4),
+	RK3066_PLL_RATE( 504000000, 1, 84, 4),
+	RK3066_PLL_RATE( 480000000, 1, 80, 4),
+	RK3066_PLL_RATE( 456000000, 1, 76, 4),
+	RK3066_PLL_RATE( 408000000, 1, 68, 4),
+	RK3066_PLL_RATE( 312000000, 1, 52, 4),
+	RK3066_PLL_RATE( 252000000, 1, 84, 8),
+	RK3066_PLL_RATE( 216000000, 1, 72, 8),
+	RK3066_PLL_RATE( 126000000, 2, 84, 8),
+	RK3066_PLL_RATE(  48000000, 2, 32, 8),
+	{ /* sentinel */ },
+};
 
 PNAME(mux_pll_p)		= { "xin24m", "xin32k" };
 PNAME(mux_armclkb_p)		= { "apllb_core", "gpllb_core" };
@@ -115,13 +179,73 @@ static const struct rockchip_cpuclk_reg_data rk3368_cpuclkl_data = {
 	.mux_core_shift = 7,
 };
 
+#define RK3368_DIV_ACLKM_MASK		0x1f
+#define RK3368_DIV_ACLKM_SHIFT		8
+#define RK3368_DIV_ATCLK_MASK		0x1f
+#define RK3368_DIV_ATCLK_SHIFT		0
+#define RK3368_DIV_PCLK_DBG_MASK	0x1f
+#define RK3368_DIV_PCLK_DBG_SHIFT	8
+
+#define RK3368_CLKSEL0(_offs, _aclkm)					\
+	{								\
+		.reg = RK3288_CLKSEL_CON(0 + _offs),			\
+		.val = HIWORD_UPDATE(_aclkm, RK3368_DIV_ACLKM_MASK,	\
+				RK3368_DIV_ACLKM_SHIFT),		\
+	}
+#define RK3368_CLKSEL1(_offs, _atclk, _pdbg)				\
+	{								\
+		.reg = RK3288_CLKSEL_CON(1 + _offs),			\
+		.val = HIWORD_UPDATE(_atclk, RK3368_DIV_ATCLK_MASK,	\
+				RK3368_DIV_ATCLK_SHIFT) |		\
+		       HIWORD_UPDATE(_pdbg, RK3368_DIV_PCLK_DBG_MASK,	\
+				RK3368_DIV_PCLK_DBG_SHIFT),		\
+	}
+
+/* cluster_b: aclkm in clksel0, rest in clksel1 */
+#define RK3368_CPUCLKB_RATE(_prate, _aclkm, _atclk, _pdbg)		\
+	{								\
+		.prate = _prate,					\
+		.divs = {						\
+			RK3368_CLKSEL0(0, _aclkm),			\
+			RK3368_CLKSEL1(0, _atclk, _pdbg),		\
+		},							\
+	}
+
+/* cluster_l: aclkm in clksel2, rest in clksel3 */
+#define RK3368_CPUCLKL_RATE(_prate, _aclkm, _atclk, _pdbg)		\
+	{								\
+		.prate = _prate,					\
+		.divs = {						\
+			RK3368_CLKSEL0(2, _aclkm),			\
+			RK3368_CLKSEL1(2, _atclk, _pdbg),		\
+		},							\
+	}
+
 static struct rockchip_cpuclk_rate_table rk3368_cpuclkb_rates[] __initdata = {
+	RK3368_CPUCLKB_RATE(1512000000, 2, 6, 6),
+	RK3368_CPUCLKB_RATE(1488000000, 2, 5, 5),
+	RK3368_CPUCLKB_RATE(1416000000, 2, 5, 5),
+	RK3368_CPUCLKB_RATE(1200000000, 2, 4, 4),
+	RK3368_CPUCLKB_RATE(1008000000, 2, 4, 4),
+	RK3368_CPUCLKB_RATE( 816000000, 2, 3, 3),
+	RK3368_CPUCLKB_RATE( 696000000, 2, 3, 3),
+	RK3368_CPUCLKB_RATE( 600000000, 2, 2, 2),
+	RK3368_CPUCLKB_RATE( 408000000, 2, 2, 2),
+	RK3368_CPUCLKB_RATE( 312000000, 2, 2, 2),
 };
 
 static struct rockchip_cpuclk_rate_table rk3368_cpuclkl_rates[] __initdata = {
+	RK3368_CPUCLKL_RATE(1512000000, 2, 7, 7),
+	RK3368_CPUCLKL_RATE(1488000000, 2, 6, 6),
+	RK3368_CPUCLKL_RATE(1416000000, 2, 6, 6),
+	RK3368_CPUCLKL_RATE(1200000000, 2, 5, 5),
+	RK3368_CPUCLKL_RATE(1008000000, 2, 5, 5),
+	RK3368_CPUCLKL_RATE( 816000000, 2, 4, 4),
+	RK3368_CPUCLKL_RATE( 696000000, 2, 3, 3),
+	RK3368_CPUCLKL_RATE( 600000000, 2, 3, 3),
+	RK3368_CPUCLKL_RATE( 408000000, 2, 2, 2),
+	RK3368_CPUCLKL_RATE( 312000000, 2, 2, 2),
 };
-
-
 
 static struct rockchip_clk_branch rk3368_clk_branches[] __initdata = {
 	/*
@@ -141,18 +265,18 @@ static struct rockchip_clk_branch rk3368_clk_branches[] __initdata = {
 	GATE(0, "gplll_core", "gpll", CLK_IGNORE_UNUSED,
 			RK3368_CLKGATE_CON(0), 5, GFLAGS),
 
-	DIV(0, "aclkm_core_b", "armclk", 0,
+	DIV(0, "aclkm_core_b", "armclkb", 0,
 			RK3368_CLKSEL_CON(0), 8, 5, DFLAGS | CLK_DIVIDER_READ_ONLY),
-	DIV(0, "atclk_core_b", "armclk", 0,
+	DIV(0, "atclk_core_b", "armclkb", 0,
 			RK3368_CLKSEL_CON(1), 0, 5, DFLAGS | CLK_DIVIDER_READ_ONLY),
-	DIV(0, "pclk_dbg_b", "armclk", 0,
+	DIV(0, "pclk_dbg_b", "armclkb", 0,
 			RK3368_CLKSEL_CON(1), 8, 5, DFLAGS | CLK_DIVIDER_READ_ONLY),
 
-	DIV(0, "aclkm_core_l", "armclk", 0,
+	DIV(0, "aclkm_core_l", "armclkl", 0,
 			RK3368_CLKSEL_CON(2), 8, 5, DFLAGS | CLK_DIVIDER_READ_ONLY),
-	DIV(0, "atclk_core_l", "armclk", 0,
+	DIV(0, "atclk_core_l", "armclkl", 0,
 			RK3368_CLKSEL_CON(3), 0, 5, DFLAGS | CLK_DIVIDER_READ_ONLY),
-	DIV(0, "pclk_dbg_l", "armclk", 0,
+	DIV(0, "pclk_dbg_l", "armclkl", 0,
 			RK3368_CLKSEL_CON(3), 8, 5, DFLAGS | CLK_DIVIDER_READ_ONLY),
 
 	GATE(0, "apllb_cs", "apllb", CLK_IGNORE_UNUSED,
@@ -167,7 +291,7 @@ static struct rockchip_clk_branch rk3368_clk_branches[] __initdata = {
 			RK3368_CLKSEL_CON(4), 8, 5, DFLAGS,
 			RK3368_CLKGATE_CON(0), 13, GFLAGS),
 
-	COMPOSITE(0, "aclk_cci_pre", mux_pll_src_cpll_gpll_usb_npll_p, 0,
+	COMPOSITE(0, "aclk_cci_pre", mux_pll_src_cpll_gpll_usb_npll_p, CLK_IGNORE_UNUSED,
 			RK3368_CLKSEL_CON(5), 6, 2, MFLAGS, 0, 7, DFLAGS,
 			RK3368_CLKGATE_CON(0), 12, GFLAGS),
 	GATE(SCLK_PVTM_CORE, "sclk_pvtm_core", "xin24m", 0, RK3368_CLKGATE_CON(7), 10, GFLAGS),
@@ -701,6 +825,16 @@ static struct rockchip_clk_branch rk3368_clk_branches[] __initdata = {
 	GATE(0, "sclk_timer01", "xin24m", CLK_IGNORE_UNUSED, RK3368_CLKGATE_CON(24), 1, GFLAGS),
 	GATE(0, "sclk_timer00", "xin24m", CLK_IGNORE_UNUSED, RK3368_CLKGATE_CON(24), 0, GFLAGS),
 };
+
+/* FIXME: leave this out for the time being? */
+static int __init rk3368_cpufreq_register(void)
+{
+	struct platform_device *pdev;
+
+	pdev = platform_device_register_simple("arm-bL-cpufreq-dt", -1, NULL, 0);
+	return (IS_ERR(pdev)) ? PTR_ERR(pdev) : 0;
+}
+core_initcall(rk3368_cpufreq_register);
 
 static void __init rk3368_clk_init(struct device_node *np)
 {
