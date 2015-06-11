@@ -76,7 +76,8 @@
 #define SCLK_USBPHY480M		122
 #define SCLK_PVTM_CORE		123
 #define SCLK_PVTM_GPU		124
-#define SCLK_SFC		125
+#define SCLK_PVTM_PMU		125
+#define SCLK_SFC		126
 
 #define SCLK_MAC		151
 #define SCLK_MACREF_OUT		152
@@ -86,13 +87,13 @@
 
 /* aclk gates */
 #define ACLK_GPU_MEM		192
-#define ACLK_DMAC_BUS		193
-#define ACLK_DMAC_PERI		194
-#define ACLK_PERI_MMU		195
-#define ACLK_GMAC		196
-#define ACLK_VOP		197
-#define ACLK_VOP_IEP		198
-//#define ACLK_CRYPTO		199*/
+#define ACLK_GPU_CFG		193
+#define ACLK_DMAC_BUS		194
+#define ACLK_DMAC_PERI		195
+#define ACLK_PERI_MMU		196
+#define ACLK_GMAC		197
+#define ACLK_VOP		198
+#define ACLK_VOP_IEP		199
 #define ACLK_RGA		200
 #define ACLK_HDCP		201
 #define ACLK_IEP		202
