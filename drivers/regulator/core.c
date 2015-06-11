@@ -1591,6 +1591,29 @@ void regulator_put(struct regulator *regulator)
 EXPORT_SYMBOL_GPL(regulator_put);
 
 /**
+ * regulator_is_match - check if two regulator's point to the same rdev
+ * @p: regulator compared against q
+ * @q: regulator compared against p
+ *
+ * Returns true if the two struct regulator pointers both point to the same rdev
+ * Returns false otherwise. Note that two NULL clks are treated as matching.
+ */
+bool regulator_is_match(const struct regulator *p, const struct regulator *q)
+{
+	/* trivial case: identical struct regulator's or both NULL */
+	if (p == q)
+		return true;
+
+	/* true if clk->core pointers match. Avoid derefing garbage */
+	if (!IS_ERR_OR_NULL(p) && !IS_ERR_OR_NULL(q))
+		if (p->rdev == q->rdev)
+			return true;
+
+	return false;
+}
+EXPORT_SYMBOL_GPL(regulator_is_match);
+
+/**
  * regulator_register_supply_alias - Provide device alias for supply lookup
  *
  * @dev: device that will be given as the regulator "consumer"

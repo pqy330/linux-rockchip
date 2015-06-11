@@ -172,6 +172,7 @@ struct regulator *__must_check devm_regulator_get_optional(struct device *dev,
 							   const char *id);
 void regulator_put(struct regulator *regulator);
 void devm_regulator_put(struct regulator *regulator);
+bool regulator_is_match(const struct regulator *p, const struct regulator *q);
 
 int regulator_register_supply_alias(struct device *dev, const char *id,
 				    struct device *alias_dev,
@@ -314,6 +315,12 @@ static inline void regulator_put(struct regulator *regulator)
 
 static inline void devm_regulator_put(struct regulator *regulator)
 {
+}
+
+static inline bool regulator_is_match(const struct regulator *p,
+				      const struct regulator *q)
+{
+	return true;
 }
 
 static inline int regulator_register_supply_alias(struct device *dev,
