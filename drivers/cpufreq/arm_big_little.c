@@ -130,12 +130,78 @@ static unsigned int bL_cpufreq_get_rate(unsigned int cpu)
 }
 
 static int
+bL_adapt_shared_regulators(u32 cluster, unsigned long *volt_max)
+{
+	unsigned long other_volt;
+	int ret, i;
+
+	for (i = 0; i < MAX_CLUSTERS; i++) {
+		if (i == cluster || IS_ERR_OR_NULL(reg[i]))
+			continue;
+
+		if (regulator_is_match(reg[cluster], reg[i])) {
+			other_volt = regulator_get_voltage(reg[i]);
+			if (other_volt > *volt_max) {
+				*volt_max = other_volt;
+			} else {
+				pr_debug("%s: adapting shared regulator in cluster %d to %lu-%lu mV\n",
+					 __func__, i, other_volt / 1000, *volt_max / 1000);
+				ret = regulator_set_voltage(reg[i], other_volt, *volt_max);
+				if (ret) {
+					pr_err("%s: shared-supply for cluster: %d, failed to scale voltage up: %d\n",
+					       __func__, cluster, ret);
+					return ret;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+static int
+bL_lock_shared_regulators(u32 cluster)
+{
+	int ret, i;
+
+	for (i = 0; i < MAX_CLUSTERS; i++) {
+		if (i == cluster || IS_ERR_OR_NULL(reg[i]))
+			continue;
+
+		if (regulator_is_match(reg[cluster], reg[i])) {
+			ret = mutex_trylock(&cluster_lock[i]);
+			if (!ret) {
+				for (i--; i >= 0; i--)
+					mutex_unlock(&cluster_lock[i]);
+				return -EBUSY;
+			}
+		}
+	}
+
+	return 0;
+}
+
+static void
+bL_unlock_shared_regulators(u32 cluster)
+{
+	int i;
+
+	for (i = 0; i < MAX_CLUSTERS; i++) {
+		if (i == cluster || IS_ERR_OR_NULL(reg[i]))
+			continue;
+
+		if (regulator_is_match(reg[cluster], reg[i]))
+			mutex_unlock(&cluster_lock[i]);
+	}
+}
+
+static int
 bL_cpufreq_set_rate_cluster(u32 cpu, u32 cluster, u32 new_rate)
 {
-	unsigned long volt = 0, volt_old = 0;
+	unsigned long volt = 0, volt_max = 0, volt_old = 0;
 	long freq_Hz;
 	u32 old_rate;
-	int ret;
+	int ret = 0;
 
 	freq_Hz = new_rate * 1000;
 	old_rate = clk_get_rate(clk[cluster]) / 1000;
@@ -144,13 +210,18 @@ bL_cpufreq_set_rate_cluster(u32 cpu, u32 cluster, u32 new_rate)
 		struct dev_pm_opp *opp;
 		unsigned long opp_freq;
 
+		ret = bL_lock_shared_regulators(cluster);
+		if(ret)
+			return 0;
+
 		rcu_read_lock();
 		opp = dev_pm_opp_find_freq_ceil(cpu_devs[cluster], &freq_Hz);
 		if (IS_ERR(opp)) {
 			rcu_read_unlock();
 			pr_err("%s: cpu %d, cluster: %d, failed to find OPP for %ld\n",
 				__func__, cpu, cluster, freq_Hz);
-			return PTR_ERR(opp);
+			ret = PTR_ERR(opp);
+			goto unlock;
 		}
 		volt = dev_pm_opp_get_voltage(opp);
 		opp_freq = dev_pm_opp_get_freq(opp);
@@ -158,20 +229,25 @@ bL_cpufreq_set_rate_cluster(u32 cpu, u32 cluster, u32 new_rate)
 		volt_old = regulator_get_voltage(reg[cluster]);
 		pr_debug("%s: cpu %d, cluster: %d, Found OPP: %ld kHz, %ld uV\n",
 			__func__, cpu, cluster, opp_freq / 1000, volt);
+
+		volt_max = volt;
+		ret = bL_adapt_shared_regulators(cluster, &volt_max);
+		if (ret)
+			goto unlock;
 	}
 
-	pr_debug("%s: cpu %d, cluster: %d, %u MHz, %ld mV --> %u MHz, %ld mV\n",
+	pr_debug("%s: cpu %d, cluster: %d, %u MHz, %ld mV --> %u MHz, %ld-%ld mV\n",
 		__func__, cpu, cluster,
 		old_rate / 1000, (volt_old > 0) ? volt_old / 1000 : -1,
-		new_rate / 1000, volt ? volt / 1000 : -1);
+		new_rate / 1000, volt ? volt / 1000 : -1, volt_max ? volt_max / 1000 : -1);
 
 	/* scaling up? scale voltage before frequency */
 	if (!IS_ERR(reg[cluster]) && new_rate > old_rate) {
-		ret = regulator_set_voltage_tol(reg[cluster], volt, 0);
+		ret = regulator_set_voltage(reg[cluster], volt, volt_max);
 		if (ret) {
 			pr_err("%s: cpu: %d, cluster: %d, failed to scale voltage up: %d\n",
 				__func__, cpu, cluster, ret);
-			return ret;
+			goto unlock;
 		}
 	}
 
@@ -181,21 +257,25 @@ bL_cpufreq_set_rate_cluster(u32 cpu, u32 cluster, u32 new_rate)
 			__func__, cluster, ret);
 		if (!IS_ERR(reg[cluster]) && volt_old > 0)
 			regulator_set_voltage_tol(reg[cluster], volt_old, 0);
-		return ret;
+		goto unlock;
 	}
 
 	/* scaling down? scale voltage after frequency */
 	if (!IS_ERR(reg[cluster]) && new_rate < old_rate) {
-		ret = regulator_set_voltage_tol(reg[cluster], volt, 0);
+		ret = regulator_set_voltage(reg[cluster], volt, volt_max);
 		if (ret) {
 			pr_err("%s: cpu: %d, cluster: %d, failed to scale voltage down: %d\n",
 				__func__, cpu, cluster, ret);
 			clk_set_rate(clk[cluster], old_rate * 1000);
-			return ret;
+			goto unlock;
 		}
 	}
 
-	return 0;
+unlock:
+	if (!IS_ERR(reg[cluster]))
+		bL_unlock_shared_regulators(cluster);
+
+	return ret;
 }
 
 static int
