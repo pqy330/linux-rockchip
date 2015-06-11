@@ -61,38 +61,34 @@
 		#address-cells = <0x2>;
 		#size-cells = <0x0>;
 
-// convert to
-// #address-cells = <1>;
-// and adapt addresses?
-
 		cpu-map {
 			cluster0 {
 				core0 {
-					cpu = <&cpu4>;
+					cpu = <&cpu_b0>;
 				};
 				core1 {
-					cpu = <&cpu5>;
+					cpu = <&cpu_b1>;
 				};
 				core2 {
-					cpu = <&cpu6>;
+					cpu = <&cpu_b2>;
 				};
 				core3 {
-					cpu = <&cpu7>;
+					cpu = <&cpu_b3>;
 				};
 			};
 
 			cluster1 {
 				core0 {
-					cpu = <&cpu0>;
+					cpu = <&cpu_l0>;
 				};
 				core1 {
-					cpu = <&cpu1>;
+					cpu = <&cpu_l1>;
 				};
 				core2 {
-					cpu = <&cpu2>;
+					cpu = <&cpu_l2>;
 				};
 				core3 {
-					cpu = <&cpu3>;
+					cpu = <&cpu_l3>;
 				};
 			};
 		};
@@ -109,68 +105,97 @@
 			};
 		};
 
-		cpu0: cpu@0 {
+		cpu_l0: cpu@0 {
 			device_type = "cpu";
 			compatible = "arm,cortex-a53", "arm,armv8";
 			reg = <0x0 0x0>;
-			enable-method = "psci";
+			clock-latency = <80000>;
+			clocks = <&cru ARMCLKL>;
+			clock-names = "cpu-cluster.1";
 			cpu-idle-states = <&cpu_sleep>;
+			enable-method = "psci";
+			operating-points = <
+				/* KHz    uV */
+				1200000 1250000
+				1008000 1100000
+				 816000 1050000
+				 696000  975000
+				 600000  950000
+				 408000  950000
+				 312000  950000
+			>;
 		};
 
-		cpu1: cpu@1 {
+		cpu_l1: cpu@1 {
 			device_type = "cpu";
 			compatible = "arm,cortex-a53", "arm,armv8";
 			reg = <0x0 0x1>;
-			enable-method = "psci";
 			cpu-idle-states = <&cpu_sleep>;
+			enable-method = "psci";
 		};
 
-		cpu2: cpu@2 {
+		cpu_l2: cpu@2 {
 			device_type = "cpu";
 			compatible = "arm,cortex-a53", "arm,armv8";
 			reg = <0x0 0x2>;
-			enable-method = "psci";
 			cpu-idle-states = <&cpu_sleep>;
+			enable-method = "psci";
 		};
 
-		cpu3: cpu@3 {
+		cpu_l3: cpu@3 {
 			device_type = "cpu";
 			compatible = "arm,cortex-a53", "arm,armv8";
 			reg = <0x0 0x3>;
-			enable-method = "psci";
 			cpu-idle-states = <&cpu_sleep>;
+			enable-method = "psci";
 		};
 
-		cpu4: cpu@100 {
+		cpu_b0: cpu@100 {
 			device_type = "cpu";
 			compatible = "arm,cortex-a53", "arm,armv8";
 			reg = <0x0 0x100>;
-			enable-method = "psci";
+			clock-latency = <80000>;
+			clocks = <&cru ARMCLKB>;
+			clock-names = "cpu-cluster.0";
 			cpu-idle-states = <&cpu_sleep>;
+			enable-method = "psci";
+			operating-points = <
+				/* KHz    uV */
+				1512000 1350000
+				1488000 1325000
+				1416000 1300000
+				1200000 1175000
+				1008000 1100000
+				 816000 1000000
+				 696000  975000
+				 600000  975000
+				 408000  950000
+				 312000  950000
+			>;
 		};
 
-		cpu5: cpu@101 {
+		cpu_b1: cpu@101 {
 			device_type = "cpu";
 			compatible = "arm,cortex-a53", "arm,armv8";
 			reg = <0x0 0x101>;
-			enable-method = "psci";
 			cpu-idle-states = <&cpu_sleep>;
+			enable-method = "psci";
 		};
 
-		cpu6: cpu@102 {
+		cpu_b2: cpu@102 {
 			device_type = "cpu";
 			compatible = "arm,cortex-a53", "arm,armv8";
 			reg = <0x0 0x102>;
-			enable-method = "psci";
 			cpu-idle-states = <&cpu_sleep>;
+			enable-method = "psci";
 		};
 
-		cpu7: cpu@103 {
+		cpu_b3: cpu@103 {
 			device_type = "cpu";
 			compatible = "arm,cortex-a53", "arm,armv8";
 			reg = <0x0 0x103>;
-			enable-method = "psci";
 			cpu-idle-states = <&cpu_sleep>;
+			enable-method = "psci";
 		};
 	};
 
@@ -430,8 +455,8 @@
 		compatible = "rockchip,rk3368-vop";
 		reg = <0x0 0xff930000 0x0 0x19c>;
 		interrupts = <GIC_SPI 15 IRQ_TYPE_LEVEL_HIGH>;
-//		clocks = <&cru ACLK_VOP0>, <&cru DCLK_VOP0>, <&cru HCLK_VOP0>;
-//		clock-names = "aclk_vop", "dclk_vop", "hclk_vop";
+		clocks = <&cru ACLK_VOP>, <&cru DCLK_VOP>, <&cru HCLK_VOP>;
+		clock-names = "aclk_vop", "dclk_vop", "hclk_vop";
 //		resets = <&cru SRST_LCDC0_AXI>, <&cru SRST_LCDC0_AHB>, <&cru SRST_LCDC0_DCLK>;
 //		reset-names = "axi", "ahb", "dclk";
 		iommus = <&vop_mmu>;

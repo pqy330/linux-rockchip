@@ -67,8 +67,8 @@
 		compatible = "gpio-keys";
 		#address-cells = <1>;
 		#size-cells = <0>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&pwr_key>;
+//		pinctrl-names = "default";
+//		pinctrl-0 = <&pwr_key>;
 
 		button@0 {
 			gpio-key,wakeup = <1>;
@@ -139,6 +139,14 @@
 	};
 };
 
+&cpu_b0 {
+	cpu-cluster.0-supply = <&vdd_cpu>;
+};
+
+&cpu_l0 {
+	cpu-cluster.1-supply = <&vdd_cpu>;
+};
+
 &emmc {
 	broken-cd;
 	bus-width = <8>;
@@ -160,8 +168,10 @@
 		reg = <0x40>;
 		fcs,suspend-voltage-selector = <1>;
 		regulator-name = "vdd_cpu";
+		regulator-enable-ramp-delay = <300>;
 		regulator-min-microvolt = <712500>;
 		regulator-max-microvolt = <1500000>;
+		regulator-ramp-delay = <8000>;
 		regulator-always-on;
 		regulator-boot-on;
 		vin-supply = <&vcc_sys>;
