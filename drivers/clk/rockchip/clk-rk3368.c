@@ -422,7 +422,7 @@ static struct rockchip_clk_branch rk3368_clk_branches[] __initdata = {
 			RK3368_CLKSEL_CON(18), 6, 2, MFLAGS, 0, 5, DFLAGS,
 			RK3368_CLKGATE_CON(4), 4, GFLAGS),
 
-	COMPOSITE(DCLK_VOP0, "dclk_vop0", mux_pll_src_cpll_gpll_npll_p, 0,
+	COMPOSITE(DCLK_VOP, "dclk_vop", mux_pll_src_cpll_gpll_npll_p, 0,
 			RK3368_CLKSEL_CON(20), 8, 2, MFLAGS, 0, 8, DFLAGS,
 			RK3368_CLKGATE_CON(4), 1, GFLAGS),
 
