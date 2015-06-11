@@ -278,6 +278,13 @@ static const struct vop_reg_data vop_init_reg_table[] = {
 	{WIN1_CTRL0, 0x00000080},
 };
 
+static const struct vop_reg_data rk3368_vop_init_reg_table[] = {
+	{SYS_CTRL, 0x00c00000}, //add bit11, global_reg_done, bit16 to 0: overlay-mode rgb, bit17 to 1: fs_same_addr-mask enabled
+	{DSP_CTRL0, 0x00000000},
+	{WIN0_CTRL0, 0x00000080},
+	{WIN1_CTRL0, 0x00000080},
+};
+
 /*
  * Note: rk3288 has a dedicated 'cursor' window, however, that window requires
  * special support to get alpha blending working.  For now, just use overlay
