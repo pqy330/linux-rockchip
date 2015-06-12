@@ -193,7 +193,55 @@ struct vop_data {
 	const struct vop_ctrl *ctrl;
 	const struct vop_win_data *win;
 	unsigned int win_size;
+	int (*set_pin_pol)(struct vop *vop,
+			   struct drm_display_mode *adjusted_mode);
 };
+
+static inline void vop_writel(struct vop *vop, uint32_t offset, uint32_t v)
+{
+	writel(v, vop->regs + offset);
+	vop->regsbak[offset >> 2] = v;
+}
+
+static inline uint32_t vop_readl(struct vop *vop, uint32_t offset)
+{
+	return readl(vop->regs + offset);
+}
+
+static inline uint32_t vop_read_reg(struct vop *vop, uint32_t base,
+				    const struct vop_reg *reg)
+{
+	return (vop_readl(vop, base + reg->offset) >> reg->shift) & reg->mask;
+}
+
+static inline void vop_cfg_done(struct vop *vop)
+{
+	writel(0x01, vop->regs + REG_CFG_DONE);
+}
+
+static inline void vop_mask_write(struct vop *vop, uint32_t offset,
+				  uint32_t mask, uint32_t v)
+{
+	if (mask) {
+		uint32_t cached_val = vop->regsbak[offset >> 2];
+
+		cached_val = (cached_val & ~mask) | v;
+		writel(cached_val, vop->regs + offset);
+		vop->regsbak[offset >> 2] = cached_val;
+	}
+}
+
+static inline void vop_mask_write_relaxed(struct vop *vop, uint32_t offset,
+					  uint32_t mask, uint32_t v)
+{
+	if (mask) {
+		uint32_t cached_val = vop->regsbak[offset >> 2];
+
+		cached_val = (cached_val & ~mask) | v;
+		writel_relaxed(cached_val, vop->regs + offset);
+		vop->regsbak[offset >> 2] = cached_val;
+	}
+}
 
 static const uint32_t formats_01[] = {
 	DRM_FORMAT_XRGB8888,
@@ -298,65 +346,74 @@ static const struct vop_win_data rk3288_vop_win_data[] = {
 	{ .base = 0x00, .phy = &cursor_data, .type = DRM_PLANE_TYPE_OVERLAY },
 };
 
+static int rk3288_set_pin_pol(struct vop *vop,
+			      struct drm_display_mode *adjusted_mode)
+{
+	uint32_t val;
+
+	val = 0x8;
+	val |= (adjusted_mode->flags & DRM_MODE_FLAG_NHSYNC) ? 0 : 1;
+	val |= (adjusted_mode->flags & DRM_MODE_FLAG_NVSYNC) ? 0 : (1 << 1);
+	VOP_CTRL_SET(vop, pin_pol, val);
+
+	return 0;
+}
+
+static int rk3368_set_pin_pol(struct vop *vop,
+			      struct drm_display_mode *adjusted_mode)
+{
+	uint32_t val;
+	int shift;
+
+	switch (vop->connector_type) {
+	case DRM_MODE_CONNECTOR_LVDS:
+		shift = 16;
+		break;
+	case DRM_MODE_CONNECTOR_HDMIA:
+		shift = 20;
+		break;
+	case DRM_MODE_CONNECTOR_eDP:
+		shift = 24;
+		break;
+	case DRM_MODE_CONNECTOR_DSI:
+		shift = 28;
+		break;
+	default:
+		return -EINVAL;
+	};
+
+	val = 0x8;
+	val |= (adjusted_mode->flags & DRM_MODE_FLAG_NHSYNC) ? 0 : 1;
+	val |= (adjusted_mode->flags & DRM_MODE_FLAG_NVSYNC) ? 0 : (1 << 1);
+
+	vop_mask_write(vop, DSP_CTRL1, 0xf << shift, val << shift);
+}
+
 static const struct vop_data rk3288_vop = {
 	.init_table = vop_init_reg_table,
 	.table_size = ARRAY_SIZE(vop_init_reg_table),
 	.ctrl = &ctrl_data,
 	.win = rk3288_vop_win_data,
 	.win_size = ARRAY_SIZE(rk3288_vop_win_data),
+	.set_pin_pol = rk3288_set_pin_pol,
+};
+
+static const struct vop_data rk3368_vop = {
+	.init_table = vop_init_reg_table,
+	.table_size = ARRAY_SIZE(vop_init_reg_table),
+	.ctrl = &ctrl_data,
+	.win = rk3288_vop_win_data,
+	.win_size = ARRAY_SIZE(rk3288_vop_win_data),
+	.set_pin_pol = rk3368_set_pin_pol,
 };
 
 static const struct of_device_id vop_driver_dt_match[] = {
 	{ .compatible = "rockchip,rk3288-vop",
 	  .data = &rk3288_vop },
+	{ .compatible = "rockchip,rk3368-vop",
+	  .data = &rk3368_vop },
 	{},
 };
-
-static inline void vop_writel(struct vop *vop, uint32_t offset, uint32_t v)
-{
-	writel(v, vop->regs + offset);
-	vop->regsbak[offset >> 2] = v;
-}
-
-static inline uint32_t vop_readl(struct vop *vop, uint32_t offset)
-{
-	return readl(vop->regs + offset);
-}
-
-static inline uint32_t vop_read_reg(struct vop *vop, uint32_t base,
-				    const struct vop_reg *reg)
-{
-	return (vop_readl(vop, base + reg->offset) >> reg->shift) & reg->mask;
-}
-
-static inline void vop_cfg_done(struct vop *vop)
-{
-	writel(0x01, vop->regs + REG_CFG_DONE);
-}
-
-static inline void vop_mask_write(struct vop *vop, uint32_t offset,
-				  uint32_t mask, uint32_t v)
-{
-	if (mask) {
-		uint32_t cached_val = vop->regsbak[offset >> 2];
-
-		cached_val = (cached_val & ~mask) | v;
-		writel(cached_val, vop->regs + offset);
-		vop->regsbak[offset >> 2] = cached_val;
-	}
-}
-
-static inline void vop_mask_write_relaxed(struct vop *vop, uint32_t offset,
-					  uint32_t mask, uint32_t v)
-{
-	if (mask) {
-		uint32_t cached_val = vop->regsbak[offset >> 2];
-
-		cached_val = (cached_val & ~mask) | v;
-		writel_relaxed(cached_val, vop->regs + offset);
-		vop->regsbak[offset >> 2] = cached_val;
-	}
-}
 
 static enum vop_data_format vop_convert_format(uint32_t format)
 {
@@ -941,10 +998,9 @@ static int vop_crtc_mode_set(struct drm_crtc *crtc,
 	};
 	VOP_CTRL_SET(vop, out_mode, vop->connector_out_mode);
 
-	val = 0x8;
-	val |= (adjusted_mode->flags & DRM_MODE_FLAG_NHSYNC) ? 0 : 1;
-	val |= (adjusted_mode->flags & DRM_MODE_FLAG_NVSYNC) ? 0 : (1 << 1);
-	VOP_CTRL_SET(vop, pin_pol, val);
+	ret = vop->data->set_pin_pol(vop, adjusted_mode);
+	if (ret)
+		goto out;
 
 	VOP_CTRL_SET(vop, htotal_pw, (htotal << 16) | hsync_len);
 	val = hact_st << 16;
