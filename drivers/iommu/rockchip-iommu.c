@@ -931,8 +931,9 @@ static int rk_iommu_add_device(struct device *dev)
 	struct iommu_group *group;
 	int ret;
 
+	/* nothing to do if device does not have an iommu */
 	if (!rk_iommu_is_dev_iommu_master(dev))
-		return -ENODEV;
+		return 0;
 
 	group = iommu_group_get(dev);
 	if (!group) {
