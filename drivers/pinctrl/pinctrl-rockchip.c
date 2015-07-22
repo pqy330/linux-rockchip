@@ -678,7 +678,8 @@ static void rk3368_calc_drv_reg_and_bit(struct rockchip_pin_bank *bank,
 
 static int rockchip_perpin_drv_list[] = { 2, 4, 8, 12 };
 
-static int rockchip_get_drive_perpin(struct rockchip_pin_bank *bank, int pin_num)
+static int rockchip_get_drive_perpin(struct rockchip_pin_bank *bank,
+				     int pin_num)
 {
 	struct rockchip_pinctrl *info = bank->drvdata;
 	struct rockchip_pin_ctrl *ctrl = info->ctrl;
@@ -699,8 +700,8 @@ static int rockchip_get_drive_perpin(struct rockchip_pin_bank *bank, int pin_num
 	return rockchip_perpin_drv_list[data];
 }
 
-static int rockchip_set_drive_perpin(struct rockchip_pin_bank *bank, int pin_num,
-			    int strength)
+static int rockchip_set_drive_perpin(struct rockchip_pin_bank *bank,
+				     int pin_num, int strength)
 {
 	struct rockchip_pinctrl *info = bank->drvdata;
 	struct rockchip_pin_ctrl *ctrl = info->ctrl;
@@ -1059,7 +1060,8 @@ static int rockchip_pinconf_set(struct pinctrl_dev *pctldev, unsigned int pin,
 			if (!info->ctrl->drv_calc_reg)
 				return -ENOTSUPP;
 
-			rc = rockchip_set_drive_perpin(bank, pin - bank->pin_base, arg);
+			rc = rockchip_set_drive_perpin(bank,
+						pin - bank->pin_base, arg);
 			if (rc < 0)
 				return rc;
 			break;
@@ -1347,9 +1349,9 @@ static int rockchip_pinctrl_register(struct platform_device *pdev,
 		return ret;
 
 	info->pctl_dev = pinctrl_register(ctrldesc, &pdev->dev, info);
-	if (!info->pctl_dev) {
+	if (IS_ERR(info->pctl_dev)) {
 		dev_err(&pdev->dev, "could not register pinctrl driver\n");
-		return -EINVAL;
+		return PTR_ERR(info->pctl_dev);
 	}
 
 	for (bank = 0; bank < info->ctrl->nr_banks; ++bank) {

@@ -47,28 +47,28 @@
 	model = "Rockchip R88";
 	compatible = "rockchip,r88", "rockchip,rk3368";
 
-//	chosen {
-//		bootargs = "earlycon=uart8250,mmio32,0xff690000";
-//	};
+	chosen {
+		stdout-path = "serial2:115200n8";
+	};
 
 	memory {
+		device_type = "memory";
 		reg = <0x0 0x0 0x0 0x40000000>;
 	};
 
-/*	emmc_pwrseq: emmc-pwrseq {
+	emmc_pwrseq: emmc-pwrseq {
 		compatible = "mmc-pwrseq-emmc";
 		pinctrl-0 = <&emmc_reset>;
 		pinctrl-names = "default";
-//		reset-gpios = <&gpio1 27 GPIO_ACTIVE_HIGH>;
-//		reset-gpios = <&gpio2 3 GPIO_ACTIVE_HIGH>;
-	};*/
+		reset-gpios = <&gpio2 3 GPIO_ACTIVE_HIGH>;
+	};
 
 	keys: gpio-keys {
 		compatible = "gpio-keys";
 		#address-cells = <1>;
 		#size-cells = <0>;
-//		pinctrl-names = "default";
-//		pinctrl-0 = <&pwr_key>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pwr_key>;
 
 		button@0 {
 			gpio-key,wakeup = <1>;
@@ -129,13 +129,66 @@
 		vin-supply = <&vcc_sys>;
 	};
 
-	vcc_sys: vsys-regulator {
+	/* supplies both host and otg */
+	vcc_host: vcc-host-regulator {
+		compatible = "regulator-fixed";
+		enable-active-high;
+		gpio = <&gpio0 4 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&host_vbus_drv>;
+		regulator-name = "vcc_host";
+		regulator-always-on;
+		regulator-boot-on;
+		vin-supply = <&vcc_sys>;
+	};
+
+	vcc_io: vcc-io-regulator {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_io";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+		regulator-boot-on;
+		vin-supply = <&vcc_sys>;
+	};
+
+	vcc_lan: vcc-lan-regulator {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_lan";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+		regulator-boot-on;
+		vin-supply = <&vcc_io>;
+	};
+
+	vcc_sys: vcc-sys-regulator {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc_sys";
 		regulator-min-microvolt = <5000000>;
 		regulator-max-microvolt = <5000000>;
 		regulator-always-on;
 		regulator-boot-on;
+	};
+
+	vccio_wl: vccio-wl-regulator {
+		compatible = "regulator-fixed";
+		regulator-name = "vccio_wl";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+		regulator-boot-on;
+		vin-supply = <&vcc_io>;
+	};
+
+	vdd_10: vdd-10-regulator {
+		compatible = "regulator-fixed";
+		regulator-name = "vdd_10";
+		regulator-min-microvolt = <1000000>;
+		regulator-max-microvolt = <1000000>;
+		regulator-always-on;
+		regulator-boot-on;
+		vin-supply = <&vcc_sys>;
 	};
 };
 
@@ -152,12 +205,26 @@
 	bus-width = <8>;
 	cap-mmc-highspeed;
 	disable-wp;
-//	mmc-pwrseq = <&emmc_pwrseq>;
+	mmc-pwrseq = <&emmc_pwrseq>;
 	non-removable;
-	num-slots = <1>; //FIXME: is this still necessary?
+	num-slots = <1>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&emmc_clk &emmc_cmd &emmc_bus8>;
 	status = "okay";
+};
+
+&gmac {
+	phy-supply = <&vcc_lan>;
+	phy-mode = "rmii";
+	clock_in_out = "output";
+	snps,reset-gpio = <&gpio3 12 0>;
+	snps,reset-active-low;
+	snps,reset-delays-us = <0 10000 1000000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&rmii_pins>;
+	tx_delay = <0x30>;
+	rx_delay = <0x10>;
+	status = "ok";
 };
 
 &i2c0 {
@@ -183,7 +250,7 @@
 		#clock-cells = <0>;
 		clock-frequency = <32768>;
 		clock-output-names = "xin32k";
-		/* rtc_int does not seem to be connected */
+		/* rtc_int is not connected */
 	};
 };
 
@@ -197,11 +264,11 @@
 	keep-power-in-suspend;
 	mmc-pwrseq = <&sdio_pwrseq>;
 	non-removable;
-	num-slots = <1>; //FIXME: is this still necessary?
+	num-slots = <1>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&sdio0_clk &sdio0_cmd &sdio0_bus4>;
-//	vmmc-supply = <&vcc33_sys>;
-//	vqmmc-supply = <&vcc18_wl>;
+	vmmc-supply = <&vcc_io>;
+	vqmmc-supply = <&vccio_wl>;
 	status = "okay";
 };
 
@@ -217,19 +284,6 @@
 	};
 
 	emmc {
-		emmc-clk {
-			rockchip,pins = <2 4 RK_FUNC_2 &pcfg_pull_none_drv_8ma>;
-		};
-
-		emmc-cmd {
-			rockchip,pins = <1 26 RK_FUNC_2 &pcfg_pull_up_drv_8ma>;
-		};
-
-/*		emmc_reset {
-			rockchip,pins = <1 27 RK_FUNC_GPIO &pcfg-pull-none>;
-			//or 2 3
-		};*/
-
 		emmc_bus8: emmc-bus8 {
 			rockchip,pins = <1 18 RK_FUNC_2 &pcfg_pull_up_drv_8ma>,
 					<1 19 RK_FUNC_2 &pcfg_pull_up_drv_8ma>,
@@ -240,17 +294,29 @@
 					<1 24 RK_FUNC_2 &pcfg_pull_up_drv_8ma>,
 					<1 25 RK_FUNC_2 &pcfg_pull_up_drv_8ma>;
 		};
-	};
 
-	keys {
-		pwr_key: pwr-key {
-			rockchip,pins = <0 2 RK_FUNC_GPIO &pcfg_pull_up>;
+		emmc-clk {
+			rockchip,pins = <2 4 RK_FUNC_2 &pcfg_pull_none_drv_8ma>;
+		};
+
+		emmc-cmd {
+			rockchip,pins = <1 26 RK_FUNC_2 &pcfg_pull_up_drv_8ma>;
+		};
+
+		emmc_reset: emmc-reset {
+			rockchip,pins = <2 3 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 
 	ir {
 		ir_int: ir-int {
 			rockchip,pins = <3 30 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
+	keys {
+		pwr_key: pwr-key {
+			rockchip,pins = <0 2 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 
@@ -273,6 +339,12 @@
 			rockchip,pins = <3 5 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
+
+	usb {
+		host_vbus_drv: host-vbus-drv {
+			rockchip,pins = <0 4 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
 };
 
 &saradc {
@@ -289,5 +361,10 @@
 };
 
 &usb_otg {
+	dr_mode = "host";
+	status = "okay";
+};
+
+&wdt {
 	status = "okay";
 };

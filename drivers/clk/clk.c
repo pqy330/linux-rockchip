@@ -62,11 +62,11 @@ struct clk_core {
 	int			phase;
 	struct hlist_head	children;
 	struct hlist_node	child_node;
-	struct hlist_node	debug_node;
 	struct hlist_head	clks;
 	unsigned int		notifier_count;
 #ifdef CONFIG_DEBUG_FS
 	struct dentry		*dentry;
+	struct hlist_node	debug_node;
 #endif
 	struct kref		ref;
 };
@@ -1416,6 +1416,9 @@ static void clk_change_rate(struct clk_core *core)
 
 	if (core->notifier_count && old_rate != core->rate)
 		__clk_notify(core, POST_RATE_CHANGE, old_rate, core->rate);
+
+	if (core->flags & CLK_RECALC_NEW_RATES)
+		(void)clk_calc_new_rates(core, core->new_rate);
 
 	/*
 	 * Use safe iteration, as change_rate can actually swap parents

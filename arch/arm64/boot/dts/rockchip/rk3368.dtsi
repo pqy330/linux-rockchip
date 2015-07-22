@@ -16,11 +16,6 @@
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
- *     You should have received a copy of the GNU General Public
- *     License along with this library; if not, write to the Free
- *     Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
- *     MA 02110-1301 USA
- *
  * Or, alternatively,
  *
  *  b) Permission is hereby granted, free of charge, to any person
@@ -56,6 +51,23 @@
 	interrupt-parent = <&gic>;
 	#address-cells = <2>;
 	#size-cells = <2>;
+
+	aliases {
+		i2c0 = &i2c0;
+		i2c1 = &i2c1;
+		i2c2 = &i2c2;
+		i2c3 = &i2c3;
+		i2c4 = &i2c4;
+		i2c5 = &i2c5;
+		serial0 = &uart0;
+		serial1 = &uart1;
+		serial2 = &uart2;
+		serial3 = &uart3;
+		serial4 = &uart4;
+		spi0 = &spi0;
+		spi1 = &spi1;
+		spi2 = &spi2;
+	};
 
 	cpus {
 		#address-cells = <0x2>;
@@ -209,6 +221,9 @@
 			     <GIC_SPI 117 IRQ_TYPE_LEVEL_HIGH>,
 			     <GIC_SPI 118 IRQ_TYPE_LEVEL_HIGH>,
 			     <GIC_SPI 119 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-affinity = <&cpu_l0>, <&cpu_l1>, <&cpu_l2>,
+				     <&cpu_l3>, <&cpu_b0>, <&cpu_b1>,
+				     <&cpu_b2>, <&cpu_b3>;
 	};
 
 	display-subsystem {
@@ -284,6 +299,97 @@
 		status = "disabled";
 	};
 
+	spi0: spi@ff110000 {
+		compatible = "rockchip,rk3368-spi", "rockchip,rk3066-spi";
+		reg = <0x0 0xff110000 0x0 0x1000>;
+		clocks = <&cru SCLK_SPI0>, <&cru PCLK_SPI0>;
+		clock-names = "spiclk", "apb_pclk";
+		interrupts = <GIC_SPI 44 IRQ_TYPE_LEVEL_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&spi0_clk &spi0_tx &spi0_rx &spi0_cs0>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		status = "disabled";
+	};
+
+	spi1: spi@ff120000 {
+		compatible = "rockchip,rk3368-spi", "rockchip,rk3066-spi";
+		reg = <0x0 0xff120000 0x0 0x1000>;
+		clocks = <&cru SCLK_SPI1>, <&cru PCLK_SPI1>;
+		clock-names = "spiclk", "apb_pclk";
+		interrupts = <GIC_SPI 45 IRQ_TYPE_LEVEL_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&spi1_clk &spi1_tx &spi1_rx &spi1_cs0>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		status = "disabled";
+	};
+
+	spi2: spi@ff130000 {
+		compatible = "rockchip,rk3368-spi", "rockchip,rk3066-spi";
+		reg = <0x0 0xff130000 0x0 0x1000>;
+		clocks = <&cru SCLK_SPI2>, <&cru PCLK_SPI2>;
+		clock-names = "spiclk", "apb_pclk";
+		interrupts = <GIC_SPI 41 IRQ_TYPE_LEVEL_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&spi2_clk &spi2_tx &spi2_rx &spi2_cs0>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		status = "disabled";
+	};
+
+	i2c1: i2c@ff140000 {
+		compatible = "rockchip,rk3368-i2c", "rockchip,rk3288-i2c";
+		reg = <0x0 0xff140000 0x0 0x1000>;
+		interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		clock-names = "i2c";
+		clocks = <&cru PCLK_I2C1>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&i2c1_xfer>;
+		status = "disabled";
+	};
+
+	i2c3: i2c@ff150000 {
+		compatible = "rockchip,rk3368-i2c", "rockchip,rk3288-i2c";
+		reg = <0x0 0xff150000 0x0 0x1000>;
+		interrupts = <GIC_SPI 63 IRQ_TYPE_LEVEL_HIGH>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		clock-names = "i2c";
+		clocks = <&cru PCLK_I2C3>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&i2c3_xfer>;
+		status = "disabled";
+	};
+
+	i2c4: i2c@ff160000 {
+		compatible = "rockchip,rk3368-i2c", "rockchip,rk3288-i2c";
+		reg = <0x0 0xff160000 0x0 0x1000>;
+		interrupts = <GIC_SPI 64 IRQ_TYPE_LEVEL_HIGH>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		clock-names = "i2c";
+		clocks = <&cru PCLK_I2C4>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&i2c4_xfer>;
+		status = "disabled";
+	};
+
+	i2c5: i2c@ff170000 {
+		compatible = "rockchip,rk3368-i2c", "rockchip,rk3288-i2c";
+		reg = <0x0 0xff170000 0x0 0x1000>;
+		interrupts = <GIC_SPI 65 IRQ_TYPE_LEVEL_HIGH>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		clock-names = "i2c";
+		clocks = <&cru PCLK_I2C5>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&i2c5_xfer>;
+		status = "disabled";
+	};
+
 	uart0: serial@ff180000 {
 		compatible = "rockchip,rk3368-uart", "snps,dw-apb-uart";
 		reg = <0x0 0xff180000 0x0 0x100>;
@@ -291,8 +397,6 @@
 		clocks = <&cru SCLK_UART0>, <&cru PCLK_UART0>;
 		clock-names = "baudclk", "apb_pclk";
 		interrupts = <GIC_SPI 55 IRQ_TYPE_LEVEL_HIGH>;
-//		pinctrl-names = "default";
-//		pinctrl-0 = <0x97 0x98>;
 		reg-shift = <2>;
 		reg-io-width = <4>;
 		status = "disabled";
@@ -307,8 +411,6 @@
 		interrupts = <GIC_SPI 56 IRQ_TYPE_LEVEL_HIGH>;
 		reg-shift = <2>;
 		reg-io-width = <4>;
-//		pinctrl-names = "default";
-//		pinctrl-0 = <0x9a 0x9b 0x9c>;
 		status = "disabled";
 	};
 
@@ -321,8 +423,6 @@
 		interrupts = <GIC_SPI 58 IRQ_TYPE_LEVEL_HIGH>;
 		reg-shift = <2>;
 		reg-io-width = <4>;
-		pinctrl-names = "default";
-		pinctrl-0 = <0xa0 0xa1 0xa2>;
 		status = "disabled";
 	};
 
@@ -335,8 +435,23 @@
 		interrupts = <GIC_SPI 59 IRQ_TYPE_LEVEL_HIGH>;
 		reg-shift = <2>;
 		reg-io-width = <4>;
-//		pinctrl-names = "default";
-//		pinctrl-0 = <0xa4 0xa5 0xa6>;
+		status = "disabled";
+	};
+
+	gmac: ethernet@ff290000 {
+		compatible = "rockchip,rk3368-gmac";
+		reg = <0x0 0xff290000 0x0 0x10000>;
+		interrupts = <GIC_SPI 27 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "macirq";
+		rockchip,grf = <&grf>;
+		clocks = <&cru SCLK_MAC>,
+			<&cru SCLK_MAC_RX>, <&cru SCLK_MAC_TX>,
+			<&cru SCLK_MACREF>, <&cru SCLK_MACREF_OUT>,
+			<&cru ACLK_GMAC>, <&cru PCLK_GMAC>;
+		clock-names = "stmmaceth",
+			"mac_clk_rx", "mac_clk_tx",
+			"clk_mac_ref", "clk_mac_refout",
+			"aclk_mac", "pclk_mac";
 		status = "disabled";
 	};
 
@@ -371,7 +486,6 @@
 		clocks = <&cru HCLK_OTG0>;
 		clock-names = "otg";
 		dr_mode = "otg";
-		/* FIXME: are fifo sizes the same as on rk3288? */
 		g-np-tx-fifo-size = <16>;
 		g-rx-fifo-size = <275>;
 		g-tx-fifo-size = <256 128 128 64 64 32>;
@@ -394,7 +508,20 @@
 		status = "disabled";
 	};
 
-	uart2: serial@ff690000 { /* UART_DBG */
+	i2c2: i2c@ff660000 {
+		compatible = "rockchip,rk3368-i2c", "rockchip,rk3288-i2c";
+		reg = <0x0 0xff660000 0x0 0x1000>;
+		interrupts = <GIC_SPI 61 IRQ_TYPE_LEVEL_HIGH>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		clock-names = "i2c";
+		clocks = <&cru PCLK_I2C2>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&i2c2_xfer>;
+		status = "disabled";
+	};
+
+	uart2: serial@ff690000 {
 		compatible = "rockchip,rk3368-uart", "snps,dw-apb-uart";
 		reg = <0x0 0xff690000 0x0 0x100>;
 		clocks = <&cru SCLK_UART2>, <&cru PCLK_UART2>;
@@ -435,7 +562,13 @@
 		reg = <0x0 0xff770000 0x0 0x1000>;
 	};
 
-
+	wdt: watchdog@ff800000 {
+		compatible = "rockchip,rk3368-wdt", "snps,dw-wdt";
+		reg = <0x0 0xff800000 0x0 0x100>;
+		clocks = <&cru PCLK_WDT>;
+		interrupts = <GIC_SPI 79 IRQ_TYPE_LEVEL_HIGH>;
+		status = "disabled";
+	};
 
 	gic: interrupt-controller@ffb71000 {
 		compatible = "arm,gic-400";
@@ -614,6 +747,11 @@
 			bias-disable;
 		};
 
+		pcfg_pull_none_12ma: pcfg-pull-none-12ma {
+			bias-disable;
+			drive-strength = <12>;
+		};
+
 		emmc {
 			emmc_clk: emmc-clk {
 				rockchip,pins = <2 4 RK_FUNC_2 &pcfg_pull_none>;
@@ -650,10 +788,78 @@
 			};
 		};
 
+		gmac {
+			rgmii_pins: rgmii-pins {
+				rockchip,pins =	<3 22 RK_FUNC_1 &pcfg_pull_none>,
+						<3 24 RK_FUNC_1 &pcfg_pull_none>,
+						<3 19 RK_FUNC_1 &pcfg_pull_none>,
+						<3 8 RK_FUNC_1 &pcfg_pull_none_12ma>,
+						<3 9 RK_FUNC_1 &pcfg_pull_none_12ma>,
+						<3 10 RK_FUNC_1 &pcfg_pull_none_12ma>,
+						<3 14 RK_FUNC_1 &pcfg_pull_none_12ma>,
+						<3 28 RK_FUNC_1 &pcfg_pull_none_12ma>,
+						<3 13 RK_FUNC_1 &pcfg_pull_none_12ma>,
+						<3 15 RK_FUNC_1 &pcfg_pull_none>,
+						<3 16 RK_FUNC_1 &pcfg_pull_none>,
+						<3 17 RK_FUNC_1 &pcfg_pull_none>,
+						<3 18 RK_FUNC_1 &pcfg_pull_none>,
+						<3 25 RK_FUNC_1 &pcfg_pull_none>,
+						<3 20 RK_FUNC_1 &pcfg_pull_none>;
+			};
+
+			rmii_pins: rmii-pins {
+				rockchip,pins =	<3 22 RK_FUNC_1 &pcfg_pull_none>,
+						<3 24 RK_FUNC_1 &pcfg_pull_none>,
+						<3 19 RK_FUNC_1 &pcfg_pull_none>,
+						<3 8 RK_FUNC_1 &pcfg_pull_none_12ma>,
+						<3 9 RK_FUNC_1 &pcfg_pull_none_12ma>,
+						<3 13 RK_FUNC_1 &pcfg_pull_none_12ma>,
+						<3 15 RK_FUNC_1 &pcfg_pull_none>,
+						<3 16 RK_FUNC_1 &pcfg_pull_none>,
+						<3 20 RK_FUNC_1 &pcfg_pull_none>,
+						<3 21 RK_FUNC_1 &pcfg_pull_none>;
+			};
+		};
+
 		i2c0 {
 			i2c0_xfer: i2c0-xfer {
 				rockchip,pins = <0 6 RK_FUNC_1 &pcfg_pull_none>,
 						<0 7 RK_FUNC_1 &pcfg_pull_none>;
+			};
+		};
+
+		i2c1 {
+			i2c1_xfer: i2c1-xfer {
+				rockchip,pins = <2 21 RK_FUNC_1 &pcfg_pull_none>,
+						<2 22 RK_FUNC_1 &pcfg_pull_none>;
+			};
+		};
+
+		i2c2 {
+			i2c2_xfer: i2c2-xfer {
+				rockchip,pins = <0 9 RK_FUNC_2 &pcfg_pull_none>,
+						<3 31 RK_FUNC_2 &pcfg_pull_none>;
+			};
+		};
+
+		i2c3 {
+			i2c3_xfer: i2c3-xfer {
+				rockchip,pins = <1 16 RK_FUNC_1 &pcfg_pull_none>,
+						<1 17 RK_FUNC_1 &pcfg_pull_none>;
+			};
+		};
+
+		i2c4 {
+			i2c4_xfer: i2c4-xfer {
+				rockchip,pins = <3 24 RK_FUNC_2 &pcfg_pull_none>,
+						<3 25 RK_FUNC_2 &pcfg_pull_none>;
+			};
+		};
+
+		i2c5 {
+			i2c5_xfer: i2c5-xfer {
+				rockchip,pins = <3 26 RK_FUNC_2 &pcfg_pull_none>,
+						<3 27 RK_FUNC_2 &pcfg_pull_none>;
 			};
 		};
 
@@ -698,6 +904,112 @@
 			};
 		};
 
+		sdmmc {
+			sdmmc_clk: sdmmc-clk {
+				rockchip,pins = <2 9 RK_FUNC_1 &pcfg_pull_none>;
+			};
+
+			sdmmc_cmd: sdmmc-cmd {
+				rockchip,pins = <2 10 RK_FUNC_1 &pcfg_pull_up>;
+			};
+
+			sdmmc_cd: sdmcc-cd {
+				rockchip,pins = <2 11 RK_FUNC_1 &pcfg_pull_up>;
+			};
+
+			sdmmc_bus1: sdmmc-bus1 {
+				rockchip,pins = <2 5 RK_FUNC_1 &pcfg_pull_up>;
+			};
+
+			sdmmc_bus4: sdmmc-bus4 {
+				rockchip,pins = <2 5 RK_FUNC_1 &pcfg_pull_up>,
+						<2 6 RK_FUNC_1 &pcfg_pull_up>,
+						<2 7 RK_FUNC_1 &pcfg_pull_up>,
+						<2 8 RK_FUNC_1 &pcfg_pull_up>;
+			};
+		};
+
+		spi0 {
+			spi0_clk: spi0-clk {
+				rockchip,pins = <1 29 RK_FUNC_2 &pcfg_pull_up>;
+			};
+			spi0_cs0: spi0-cs0 {
+				rockchip,pins = <1 24 RK_FUNC_3 &pcfg_pull_up>;
+			};
+			spi0_cs1: spi0-cs1 {
+				rockchip,pins = <1 25 RK_FUNC_3 &pcfg_pull_up>;
+			};
+			spi0_tx: spi0-tx {
+				rockchip,pins = <1 23 RK_FUNC_3 &pcfg_pull_up>;
+			};
+			spi0_rx: spi0-rx {
+				rockchip,pins = <1 22 RK_FUNC_3 &pcfg_pull_up>;
+			};
+		};
+
+		spi1 {
+			spi1_clk: spi1-clk {
+				rockchip,pins = <1 14 RK_FUNC_2 &pcfg_pull_up>;
+			};
+			spi1_cs0: spi1-cs0 {
+				rockchip,pins = <1 15 RK_FUNC_2 &pcfg_pull_up>;
+			};
+			spi1_cs1: spi1-cs1 {
+				rockchip,pins = <3 28 RK_FUNC_2 &pcfg_pull_up>;
+			};
+			spi1_rx: spi1-rx {
+				rockchip,pins = <1 16 RK_FUNC_2 &pcfg_pull_up>;
+			};
+			spi1_tx: spi1-tx {
+				rockchip,pins = <1 17 RK_FUNC_2 &pcfg_pull_up>;
+			};
+		};
+
+		spi2 {
+			spi2_clk: spi2-clk {
+				rockchip,pins = <0 12 RK_FUNC_2 &pcfg_pull_up>;
+			};
+			spi2_cs0: spi2-cs0 {
+				rockchip,pins = <0 13 RK_FUNC_2 &pcfg_pull_up>;
+			};
+			spi2_rx: spi2-rx {
+				rockchip,pins = <0 10 RK_FUNC_2 &pcfg_pull_up>;
+			};
+			spi2_tx: spi2-tx {
+				rockchip,pins = <0 11 RK_FUNC_2 &pcfg_pull_up>;
+			};
+		};
+
+		uart0 {
+			uart0_xfer: uart0-xfer {
+				rockchip,pins = <2 24 RK_FUNC_1 &pcfg_pull_up>,
+						<2 25 RK_FUNC_1 &pcfg_pull_none>;
+			};
+
+			uart0_cts: uart0-cts {
+				rockchip,pins = <2 26 RK_FUNC_1 &pcfg_pull_none>;
+			};
+
+			uart0_rts: uart0-rts {
+				rockchip,pins = <2 27 RK_FUNC_1 &pcfg_pull_none>;
+			};
+		};
+
+		uart1 {
+			uart1_xfer: uart1-xfer {
+				rockchip,pins = <0 20 RK_FUNC_3 &pcfg_pull_up>,
+						<0 21 RK_FUNC_3 &pcfg_pull_none>;
+			};
+
+			uart1_cts: uart1-cts {
+				rockchip,pins = <0 22 RK_FUNC_3 &pcfg_pull_none>;
+			};
+
+			uart1_rts: uart1-rts {
+				rockchip,pins = <0 23 RK_FUNC_3 &pcfg_pull_none>;
+			};
+		};
+
 		uart2 {
 			uart2_xfer: uart2-xfer {
 				rockchip,pins = <2 6 RK_FUNC_2 &pcfg_pull_up>,
@@ -705,6 +1017,35 @@
 			};
 			/* no rts / cts for uart2 */
 		};
+
+		uart3 {
+			uart3_xfer: uart3-xfer {
+				rockchip,pins = <3 29 RK_FUNC_2 &pcfg_pull_up>,
+						<3 30 RK_FUNC_3 &pcfg_pull_none>;
+			};
+
+			uart3_cts: uart3-cts {
+				rockchip,pins = <3 16 RK_FUNC_2 &pcfg_pull_none>;
+			};
+
+			uart3_rts: uart3-rts {
+				rockchip,pins = <3 17 RK_FUNC_2 &pcfg_pull_none>;
+			};
+		};
+
+		uart4 {
+			uart4_xfer: uart4-xfer {
+				rockchip,pins = <0 27 RK_FUNC_3 &pcfg_pull_up>,
+						<0 26 RK_FUNC_3 &pcfg_pull_none>;
+			};
+
+			uart4_cts: uart4-cts {
+				rockchip,pins = <0 24 RK_FUNC_3 &pcfg_pull_none>;
+			};
+
+			uart4_rts: uart4-rts {
+				rockchip,pins = <0 25 RK_FUNC_3 &pcfg_pull_none>;
+			};
+		};
 	};
 };
-
