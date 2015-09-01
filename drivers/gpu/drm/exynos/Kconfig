@@ -55,8 +55,9 @@ config DRM_EXYNOS_DSI
 	  This enables support for Exynos MIPI-DSI device.
 
 config DRM_EXYNOS_DP
-	bool "EXYNOS DRM DP driver support"
+	bool "EXYNOS specific extensions for Analogix DP driver"
 	depends on DRM_EXYNOS && (DRM_EXYNOS_FIMD || DRM_EXYNOS7_DECON)
+	select DRM_ANALOGIX_DP
 	default DRM_EXYNOS
 	select DRM_PANEL
 	help

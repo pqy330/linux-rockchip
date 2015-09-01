@@ -1,0 +1,4 @@
+config DRM_ANALOGIX_DP
+	tristate
+	depends on DRM
+	select DRM_KMS_HELPER
