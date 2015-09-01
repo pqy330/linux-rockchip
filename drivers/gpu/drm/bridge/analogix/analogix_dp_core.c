@@ -908,12 +908,6 @@ static void analogix_dp_commit(struct analogix_dp_device *dp)
 			DRM_ERROR("failed to disable the panel\n");
 	}
 
-	ret = analogix_dp_detect_hpd(dp);
-	if (ret) {
-		/* Cable has been disconnected, we're done */
-		return;
-	}
-
 	ret = analogix_dp_handle_edid(dp);
 	if (ret) {
 		dev_err(dp->dev, "unable to handle edid\n");
@@ -949,6 +943,12 @@ static void analogix_dp_commit(struct analogix_dp_device *dp)
 static enum drm_connector_status
 analogix_dp_detect(struct drm_connector *connector, bool force)
 {
+	struct analogix_dp_device *dp = connector_to_dp(connector);
+
+	if (analogix_dp_detect_hpd(dp))
+		/* Cable has been disconnected, we're done */
+		return connector_status_disconnected;
+
 	return connector_status_connected;
 }
 
