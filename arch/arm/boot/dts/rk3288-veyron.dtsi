@@ -52,6 +52,15 @@
 		reg = <0x0 0x80000000>;
 	};
 
+	firmware {
+		chromeos {
+			pinctrl-names = "default";
+			pinctrl-0 = <&fw_wp_ap &rec_mode_l>;
+			write-protect-gpio = <&gpio7 6 GPIO_ACTIVE_LOW>;
+			recovery-switch = <&gpio0 9 GPIO_ACTIVE_LOW>;
+		};
+	};
+
 	gpio_keys: gpio-keys {
 		compatible = "gpio-keys";
 		#address-cells = <1>;
@@ -75,6 +84,26 @@
 		pinctrl-0 = <&ap_warm_reset_h>;
 		priority = <200>;
 	};
+
+/*	vdd_logic: pwm-regulator {
+		compatible = "pwm-regulator";
+		pwms = <&pwm1 0 2000 0>;
+
+		voltage-table = <1350000 0>,
+				<1300000 10>,
+				<1250000 20>,
+				<1200000 31>,
+				<1150000 41>,
+				<1100000 52>,
+				<1050000 62>,
+				<1000000 72>,
+				< 950000 83>;
+
+		regulator-min-microvolt = <950000>;
+		regulator-max-microvolt = <1350000>;
+		regulator-name = "vdd_logic";
+		regulator-ramp-delay = <4000>;
+	};*/
 
 	emmc_pwrseq: emmc-pwrseq {
 		compatible = "mmc-pwrseq-emmc";
@@ -141,6 +170,22 @@
 
 &cpu0 {
 	cpu0-supply = <&vdd_cpu>;
+	operating-points = <
+		/* KHz    uV */
+		1800000 1400000
+		1704000 1350000
+		1608000 1300000
+		1512000 1250000
+		1416000 1200000
+		1200000 1100000
+		1008000 1050000
+		 816000 1000000
+		 696000  950000
+		 600000  900000
+		 408000  900000
+		 216000  900000
+		 126000  900000
+	>;
 };
 
 &emmc {
@@ -155,6 +200,11 @@
 	num-slots = <1>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&emmc_clk &emmc_cmd &emmc_bus8>;
+};
+
+&gpu {
+	mali-supply = <&vdd_gpu>;
+	status = "okay";
 };
 
 &hdmi {
@@ -335,6 +385,12 @@
 	clock-frequency = <100000>;
 	i2c-scl-falling-time-ns = <300>;
 	i2c-scl-rising-time-ns = <1000>;
+};
+
+&i2s {
+	status = "okay";
+	clock-names = "i2s_hclk", "i2s_clk", "i2s_clk_out";
+	clocks = <&cru HCLK_I2S0>, <&cru SCLK_I2S0>, <&cru SCLK_I2S0_OUT>;
 };
 
 &pwm1 {

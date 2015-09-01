@@ -45,6 +45,7 @@
 /dts-v1/;
 #include "rk3288-veyron-chromebook.dtsi"
 #include "cros-ec-sbs.dtsi"
+#include "marvell_txpwrlimit.dtsi"
 
 / {
 	model = "Google Jerry";
@@ -87,6 +88,14 @@
 	};
 };
 
+&backlight {
+	power-supply = <&backlight_regulator>;
+};
+
+&panel {
+	power-supply= <&panel_regulator>;
+};
+
 &rk808 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pmic_int_l>;
@@ -126,6 +135,11 @@
 	pinctrl-0 = <&vcc50_hdmi_en>;
 };
 
+&edp {
+	pinctrl-names = "default";
+	pinctrl-0 = <&edp_hpd>;
+};
+
 &pinctrl {
 	backlight {
 		bl_pwr_en: bl_pwr_en {
@@ -136,6 +150,12 @@
 	buck-5v {
 		drv_5v: drv-5v {
 			rockchip,pins = <7 21 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
+	edp {
+		edp_hpd: edp_hpd {
+			rockchip,pins = <7 11 RK_FUNC_2 &pcfg_pull_down>;
 		};
 	};
 
