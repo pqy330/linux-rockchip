@@ -202,8 +202,8 @@ void exynos_dp_set_pll_power_down(struct exynos_dp_device *dp, bool enable)
 }
 
 void exynos_dp_set_analog_power_down(struct exynos_dp_device *dp,
-				enum analog_power_block block,
-				bool enable)
+				     enum analog_power_block block,
+				     bool enable)
 {
 	u32 reg;
 
@@ -399,8 +399,8 @@ void exynos_dp_init_aux(struct exynos_dp_device *dp)
 	exynos_dp_reset_aux(dp);
 
 	/* Disable AUX transaction H/W retry */
-	reg = AUX_BIT_PERIOD_EXPECTED_DELAY(3) | AUX_HW_RETRY_COUNT_SEL(0)|
-		AUX_HW_RETRY_INTERVAL_600_MICROSECONDS;
+	reg = AUX_BIT_PERIOD_EXPECTED_DELAY(3) | AUX_HW_RETRY_COUNT_SEL(0) |
+	      AUX_HW_RETRY_INTERVAL_600_MICROSECONDS;
 	writel(reg, dp->reg_base + EXYNOS_DP_AUX_HW_RETRY_CTL);
 
 	/* Receive AUX Channel DEFER commands equal to DEFFER_COUNT*64 */
@@ -483,8 +483,8 @@ int exynos_dp_start_aux_transaction(struct exynos_dp_device *dp)
 }
 
 int exynos_dp_write_byte_to_dpcd(struct exynos_dp_device *dp,
-				unsigned int reg_addr,
-				unsigned char data)
+				 unsigned int reg_addr,
+				 unsigned char data)
 {
 	u32 reg;
 	int i;
@@ -519,17 +519,16 @@ int exynos_dp_write_byte_to_dpcd(struct exynos_dp_device *dp,
 		retval = exynos_dp_start_aux_transaction(dp);
 		if (retval == 0)
 			break;
-		else
-			dev_dbg(dp->dev, "%s: Aux Transaction fail!\n",
-				__func__);
+
+		dev_dbg(dp->dev, "%s: Aux Transaction fail!\n", __func__);
 	}
 
 	return retval;
 }
 
 int exynos_dp_read_byte_from_dpcd(struct exynos_dp_device *dp,
-				unsigned int reg_addr,
-				unsigned char *data)
+				  unsigned int reg_addr,
+				  unsigned char *data)
 {
 	u32 reg;
 	int i;
@@ -560,9 +559,8 @@ int exynos_dp_read_byte_from_dpcd(struct exynos_dp_device *dp,
 		retval = exynos_dp_start_aux_transaction(dp);
 		if (retval == 0)
 			break;
-		else
-			dev_dbg(dp->dev, "%s: Aux Transaction fail!\n",
-				__func__);
+
+		dev_dbg(dp->dev, "%s: Aux Transaction fail!\n", __func__);
 	}
 
 	/* Read data buffer */
@@ -573,9 +571,9 @@ int exynos_dp_read_byte_from_dpcd(struct exynos_dp_device *dp,
 }
 
 int exynos_dp_write_bytes_to_dpcd(struct exynos_dp_device *dp,
-				unsigned int reg_addr,
-				unsigned int count,
-				unsigned char data[])
+				  unsigned int reg_addr,
+				  unsigned int count,
+				  unsigned char data[])
 {
 	u32 reg;
 	unsigned int start_offset;
@@ -625,9 +623,9 @@ int exynos_dp_write_bytes_to_dpcd(struct exynos_dp_device *dp,
 			retval = exynos_dp_start_aux_transaction(dp);
 			if (retval == 0)
 				break;
-			else
-				dev_dbg(dp->dev, "%s: Aux Transaction fail!\n",
-					__func__);
+
+			dev_dbg(dp->dev, "%s: Aux Transaction fail!\n",
+				__func__);
 		}
 
 		start_offset += cur_data_count;
@@ -637,9 +635,9 @@ int exynos_dp_write_bytes_to_dpcd(struct exynos_dp_device *dp,
 }
 
 int exynos_dp_read_bytes_from_dpcd(struct exynos_dp_device *dp,
-				unsigned int reg_addr,
-				unsigned int count,
-				unsigned char data[])
+				   unsigned int reg_addr,
+				   unsigned int count,
+				   unsigned char data[])
 {
 	u32 reg;
 	unsigned int start_offset;
@@ -683,9 +681,9 @@ int exynos_dp_read_bytes_from_dpcd(struct exynos_dp_device *dp,
 			retval = exynos_dp_start_aux_transaction(dp);
 			if (retval == 0)
 				break;
-			else
-				dev_dbg(dp->dev, "%s: Aux Transaction fail!\n",
-					__func__);
+
+			dev_dbg(dp->dev, "%s: Aux Transaction fail!\n",
+				__func__);
 		}
 
 		for (cur_data_idx = 0; cur_data_idx < cur_data_count;
@@ -736,9 +734,9 @@ int exynos_dp_select_i2c_device(struct exynos_dp_device *dp,
 }
 
 int exynos_dp_read_byte_from_i2c(struct exynos_dp_device *dp,
-				unsigned int device_addr,
-				unsigned int reg_addr,
-				unsigned int *data)
+				 unsigned int device_addr,
+				 unsigned int reg_addr,
+				 unsigned int *data)
 {
 	u32 reg;
 	int i;
@@ -767,9 +765,8 @@ int exynos_dp_read_byte_from_i2c(struct exynos_dp_device *dp,
 		retval = exynos_dp_start_aux_transaction(dp);
 		if (retval == 0)
 			break;
-		else
-			dev_dbg(dp->dev, "%s: Aux Transaction fail!\n",
-				__func__);
+
+		dev_dbg(dp->dev, "%s: Aux Transaction fail!\n", __func__);
 	}
 
 	/* Read data */
@@ -780,10 +777,10 @@ int exynos_dp_read_byte_from_i2c(struct exynos_dp_device *dp,
 }
 
 int exynos_dp_read_bytes_from_i2c(struct exynos_dp_device *dp,
-				unsigned int device_addr,
-				unsigned int reg_addr,
-				unsigned int count,
-				unsigned char edid[])
+				  unsigned int device_addr,
+				  unsigned int reg_addr,
+				  unsigned int count,
+				  unsigned char edid[])
 {
 	u32 reg;
 	unsigned int i, j;
@@ -807,8 +804,8 @@ int exynos_dp_read_bytes_from_i2c(struct exynos_dp_device *dp,
 			 * request without sending address
 			 */
 			if (!defer)
-				retval = exynos_dp_select_i2c_device(dp,
-						device_addr, reg_addr + i);
+				retval = exynos_dp_select_i2c_device(
+						dp, device_addr, reg_addr + i);
 			else
 				defer = 0;
 
@@ -819,24 +816,23 @@ int exynos_dp_read_bytes_from_i2c(struct exynos_dp_device *dp,
 				 * If Bit 3 is 0, I2C transaction.
 				 */
 				reg = AUX_LENGTH(16) |
-					AUX_TX_COMM_I2C_TRANSACTION |
-					AUX_TX_COMM_READ;
+				      AUX_TX_COMM_I2C_TRANSACTION |
+				      AUX_TX_COMM_READ;
 				writel(reg, dp->reg_base +
-					EXYNOS_DP_AUX_CH_CTL_1);
+				       EXYNOS_DP_AUX_CH_CTL_1);
 
 				/* Start AUX transaction */
 				retval = exynos_dp_start_aux_transaction(dp);
 				if (retval == 0)
 					break;
-				else
-					dev_dbg(dp->dev,
-						"%s: Aux Transaction fail!\n",
-						__func__);
+
+				dev_dbg(dp->dev, "%s: Aux Transaction fail!\n",
+					__func__);
 			}
 			/* Check if Rx sends defer */
 			reg = readl(dp->reg_base + EXYNOS_DP_AUX_RX_COMM);
 			if (reg == AUX_RX_COMM_AUX_DEFER ||
-				reg == AUX_RX_COMM_I2C_DEFER) {
+			    reg == AUX_RX_COMM_I2C_DEFER) {
 				dev_err(dp->dev, "Defer: %d\n\n", reg);
 				defer = 1;
 			}
@@ -901,7 +897,7 @@ void exynos_dp_enable_enhanced_mode(struct exynos_dp_device *dp, bool enable)
 }
 
 void exynos_dp_set_training_pattern(struct exynos_dp_device *dp,
-				 enum pattern_set pattern)
+				    enum pattern_set pattern)
 {
 	u32 reg;
 
@@ -974,7 +970,7 @@ void exynos_dp_set_lane3_pre_emphasis(struct exynos_dp_device *dp, u32 level)
 }
 
 void exynos_dp_set_lane0_link_training(struct exynos_dp_device *dp,
-					u32 training_lane)
+				       u32 training_lane)
 {
 	u32 reg;
 
@@ -983,7 +979,7 @@ void exynos_dp_set_lane0_link_training(struct exynos_dp_device *dp,
 }
 
 void exynos_dp_set_lane1_link_training(struct exynos_dp_device *dp,
-					u32 training_lane)
+				       u32 training_lane)
 {
 	u32 reg;
 
@@ -992,7 +988,7 @@ void exynos_dp_set_lane1_link_training(struct exynos_dp_device *dp,
 }
 
 void exynos_dp_set_lane2_link_training(struct exynos_dp_device *dp,
-					u32 training_lane)
+				       u32 training_lane)
 {
 	u32 reg;
 
@@ -1001,7 +997,7 @@ void exynos_dp_set_lane2_link_training(struct exynos_dp_device *dp,
 }
 
 void exynos_dp_set_lane3_link_training(struct exynos_dp_device *dp,
-					u32 training_lane)
+				       u32 training_lane)
 {
 	u32 reg;
 
@@ -1125,9 +1121,9 @@ int exynos_dp_is_slave_video_stream_clock_on(struct exynos_dp_device *dp)
 }
 
 void exynos_dp_set_video_cr_mn(struct exynos_dp_device *dp,
-		enum clock_recovery_m_value_type type,
-		u32 m_value,
-		u32 n_value)
+			       enum clock_recovery_m_value_type type,
+			       u32 m_value,
+			       u32 n_value)
 {
 	u32 reg;
 
@@ -1221,7 +1217,7 @@ void exynos_dp_config_video_slave_mode(struct exynos_dp_device *dp)
 	u32 reg;
 
 	reg = readl(dp->reg_base + EXYNOS_DP_FUNC_EN_1);
-	reg &= ~(MASTER_VID_FUNC_EN_N|SLAVE_VID_FUNC_EN_N);
+	reg &= ~(MASTER_VID_FUNC_EN_N | SLAVE_VID_FUNC_EN_N);
 	reg |= MASTER_VID_FUNC_EN_N;
 	writel(reg, dp->reg_base + EXYNOS_DP_FUNC_EN_1);
 

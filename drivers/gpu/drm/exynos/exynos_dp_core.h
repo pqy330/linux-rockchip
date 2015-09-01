@@ -179,8 +179,8 @@ void exynos_dp_config_interrupt(struct exynos_dp_device *dp);
 enum pll_status exynos_dp_get_pll_lock_status(struct exynos_dp_device *dp);
 void exynos_dp_set_pll_power_down(struct exynos_dp_device *dp, bool enable);
 void exynos_dp_set_analog_power_down(struct exynos_dp_device *dp,
-				enum analog_power_block block,
-				bool enable);
+				     enum analog_power_block block,
+				     bool enable);
 void exynos_dp_init_analog_func(struct exynos_dp_device *dp);
 void exynos_dp_init_hpd(struct exynos_dp_device *dp);
 enum dp_irq_type exynos_dp_get_irq_type(struct exynos_dp_device *dp);
@@ -191,50 +191,50 @@ int exynos_dp_get_plug_in_status(struct exynos_dp_device *dp);
 void exynos_dp_enable_sw_function(struct exynos_dp_device *dp);
 int exynos_dp_start_aux_transaction(struct exynos_dp_device *dp);
 int exynos_dp_write_byte_to_dpcd(struct exynos_dp_device *dp,
-				unsigned int reg_addr,
-				unsigned char data);
+				 unsigned int reg_addr,
+				 unsigned char data);
 int exynos_dp_read_byte_from_dpcd(struct exynos_dp_device *dp,
-				unsigned int reg_addr,
-				unsigned char *data);
+				  unsigned int reg_addr,
+				  unsigned char *data);
 int exynos_dp_write_bytes_to_dpcd(struct exynos_dp_device *dp,
-				unsigned int reg_addr,
-				unsigned int count,
-				unsigned char data[]);
+				  unsigned int reg_addr,
+				  unsigned int count,
+				  unsigned char data[]);
 int exynos_dp_read_bytes_from_dpcd(struct exynos_dp_device *dp,
-				unsigned int reg_addr,
-				unsigned int count,
-				unsigned char data[]);
+				   unsigned int reg_addr,
+				   unsigned int count,
+				   unsigned char data[]);
 int exynos_dp_select_i2c_device(struct exynos_dp_device *dp,
 				unsigned int device_addr,
 				unsigned int reg_addr);
 int exynos_dp_read_byte_from_i2c(struct exynos_dp_device *dp,
-				unsigned int device_addr,
-				unsigned int reg_addr,
-				unsigned int *data);
+				 unsigned int device_addr,
+				 unsigned int reg_addr,
+				 unsigned int *data);
 int exynos_dp_read_bytes_from_i2c(struct exynos_dp_device *dp,
-				unsigned int device_addr,
-				unsigned int reg_addr,
-				unsigned int count,
-				unsigned char edid[]);
+				  unsigned int device_addr,
+				  unsigned int reg_addr,
+				  unsigned int count,
+				  unsigned char edid[]);
 void exynos_dp_set_link_bandwidth(struct exynos_dp_device *dp, u32 bwtype);
 void exynos_dp_get_link_bandwidth(struct exynos_dp_device *dp, u32 *bwtype);
 void exynos_dp_set_lane_count(struct exynos_dp_device *dp, u32 count);
 void exynos_dp_get_lane_count(struct exynos_dp_device *dp, u32 *count);
 void exynos_dp_enable_enhanced_mode(struct exynos_dp_device *dp, bool enable);
 void exynos_dp_set_training_pattern(struct exynos_dp_device *dp,
-				 enum pattern_set pattern);
+				    enum pattern_set pattern);
 void exynos_dp_set_lane0_pre_emphasis(struct exynos_dp_device *dp, u32 level);
 void exynos_dp_set_lane1_pre_emphasis(struct exynos_dp_device *dp, u32 level);
 void exynos_dp_set_lane2_pre_emphasis(struct exynos_dp_device *dp, u32 level);
 void exynos_dp_set_lane3_pre_emphasis(struct exynos_dp_device *dp, u32 level);
 void exynos_dp_set_lane0_link_training(struct exynos_dp_device *dp,
-				u32 training_lane);
+				       u32 training_lane);
 void exynos_dp_set_lane1_link_training(struct exynos_dp_device *dp,
-				u32 training_lane);
+				       u32 training_lane);
 void exynos_dp_set_lane2_link_training(struct exynos_dp_device *dp,
-				u32 training_lane);
+				       u32 training_lane);
 void exynos_dp_set_lane3_link_training(struct exynos_dp_device *dp,
-				u32 training_lane);
+				       u32 training_lane);
 u32 exynos_dp_get_lane0_link_training(struct exynos_dp_device *dp);
 u32 exynos_dp_get_lane1_link_training(struct exynos_dp_device *dp);
 u32 exynos_dp_get_lane2_link_training(struct exynos_dp_device *dp);
@@ -245,9 +245,9 @@ void exynos_dp_init_video(struct exynos_dp_device *dp);
 void exynos_dp_set_video_color_format(struct exynos_dp_device *dp);
 int exynos_dp_is_slave_video_stream_clock_on(struct exynos_dp_device *dp);
 void exynos_dp_set_video_cr_mn(struct exynos_dp_device *dp,
-			enum clock_recovery_m_value_type type,
-			u32 m_value,
-			u32 n_value);
+			       enum clock_recovery_m_value_type type,
+			       u32 m_value,
+			       u32 n_value);
 void exynos_dp_set_video_timing_mode(struct exynos_dp_device *dp, u32 type);
 void exynos_dp_enable_video_master(struct exynos_dp_device *dp, bool enable);
 void exynos_dp_start_video(struct exynos_dp_device *dp);
