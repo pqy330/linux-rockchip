@@ -28,8 +28,13 @@
 
 #include "exynos_drm_crtc.h"
 
-#define plat_data_to_dp(pd) \
-		container_of(pd, struct exynos_dp_device, plat_data)
+#define to_dp(nm)	container_of(nm, struct exynos_dp_device, nm)
+
+struct video_info {
+	bool h_sync_polarity;
+	bool v_sync_polarity;
+	bool interlaced;
+};
 
 struct exynos_dp_device {
 	struct drm_encoder         encoder;
@@ -39,12 +44,13 @@ struct exynos_dp_device {
 
 	struct exynos_drm_panel_info priv;
 	struct analogix_dp_plat_data plat_data;
+	struct video_info            video_info;
 };
 
 int exynos_dp_crtc_clock_enable(struct analogix_dp_plat_data *plat_data,
 				bool enable)
 {
-	struct exynos_dp_device *dp = plat_data_to_dp(plat_data);
+	struct exynos_dp_device *dp = to_dp(plat_data);
 	struct drm_encoder *encoder = &dp->encoder;
 	struct exynos_drm_crtc *crtc;
 
@@ -71,7 +77,7 @@ static int exynos_dp_poweroff(struct analogix_dp_plat_data *plat_data)
 static int exynos_dp_get_modes(struct analogix_dp_plat_data *plat_data,
 			       struct drm_connector *connector)
 {
-	struct exynos_dp_device *dp = plat_data_to_dp(plat_data);
+	struct exynos_dp_device *dp = to_dp(plat_data);
 	struct drm_display_mode *mode;
 
 	if (dp->plat_data.panel)
@@ -99,7 +105,7 @@ static int exynos_dp_get_modes(struct analogix_dp_plat_data *plat_data,
 static int exynos_dp_bridge_attach(struct analogix_dp_plat_data *plat_data,
 				   struct drm_bridge *bridge)
 {
-	struct exynos_dp_device *dp = plat_data_to_dp(plat_data);
+	struct exynos_dp_device *dp = to_dp(plat_data);
 	struct drm_encoder *encoder = &dp->encoder;
 	int ret;
 
@@ -122,6 +128,28 @@ static bool exynos_dp_mode_fixup(struct drm_encoder *encoder,
 				 const struct drm_display_mode *mode,
 				 struct drm_display_mode *adjusted_mode)
 {
+	struct exynos_dp_device *dp = to_dp(encoder);
+	int flags = adjusted_mode->flags;
+
+	flags &= ~(DRM_MODE_FLAG_PHSYNC | DRM_MODE_FLAG_NHSYNC |
+		   DRM_MODE_FLAG_PVSYNC | DRM_MODE_FLAG_NVSYNC |
+		   DRM_MODE_FLAG_INTERLACE);
+
+	if (dp->video_info.h_sync_polarity)
+		flags |= DRM_MODE_FLAG_PHSYNC;
+	else
+		flags |= DRM_MODE_FLAG_NHSYNC;
+
+	if (dp->video_info.v_sync_polarity)
+		flags |= DRM_MODE_FLAG_PVSYNC;
+	else
+		flags |= DRM_MODE_FLAG_NVSYNC;
+
+	if (dp->video_info.interlaced)
+		flags |= DRM_MODE_FLAG_INTERLACE;
+
+	adjusted_mode->flags = flags;
+
 	return true;
 }
 
@@ -163,6 +191,22 @@ static int exynos_dp_dt_parse_panel(struct exynos_dp_device *dp)
 	return 0;
 }
 
+static int exynos_dp_dt_parse_video_info(struct exynos_dp_device *dp)
+{
+	struct device_node *dp_node = dp->dev->of_node;
+
+	dp->video_info.h_sync_polarity =
+		of_property_read_bool(dp_node, "hsync-active-high");
+
+	dp->video_info.v_sync_polarity =
+		of_property_read_bool(dp_node, "vsync-active-high");
+
+	dp->video_info.interlaced =
+		of_property_read_bool(dp_node, "interlaced");
+
+	return 0;
+}
+
 static int exynos_dp_bind(struct device *dev, struct device *master, void *data)
 {
 	struct exynos_dp_device *dp = dev_get_drvdata(dev);
@@ -190,6 +234,10 @@ static int exynos_dp_bind(struct device *dev, struct device *master, void *data)
 		if (ret)
 			return ret;
 	}
+
+	ret = exynos_dp_dt_parse_video_info(dp);
+	if (ret)
+		return ret;
 
 	pipe = exynos_drm_crtc_get_pipe_from_type(drm_dev,
 						  EXYNOS_DISPLAY_TYPE_LCD);

@@ -897,8 +897,8 @@ static void analogix_dp_commit(struct analogix_dp_device *dp)
 		return;
 	}
 
-	ret = analogix_dp_set_link_train(dp, dp->video_info->lane_count,
-					 dp->video_info->link_rate);
+	ret = analogix_dp_set_link_train(dp, dp->video_info.lane_count,
+					 dp->video_info.link_rate);
 	if (ret) {
 		dev_err(dp->dev, "unable to do link train\n");
 		return;
@@ -1081,6 +1081,82 @@ static void analogix_dp_bridge_disable(struct drm_bridge *bridge)
 	dp->dpms_mode = DRM_MODE_DPMS_OFF;
 }
 
+static void analogix_dp_bridge_mode_set(struct drm_bridge *bridge,
+					struct drm_display_mode *orig_mode,
+					struct drm_display_mode *mode)
+{
+	struct analogix_dp_device *dp = bridge->driver_private;
+	struct drm_display_info *display_info = &dp->connector.display_info;
+	struct video_info *video_info = &dp->video_info;
+	struct device_node *dp_node = dp->dev->of_node;
+	int vic;
+
+	/* interlaces & hsync pol & vsync pol */
+	video_info->interlaced = !!(mode->flags & DRM_MODE_FLAG_INTERLACE);
+	video_info->v_sync_polarity = !!(mode->flags & DRM_MODE_FLAG_NVSYNC);
+	video_info->h_sync_polarity = !!(mode->flags & DRM_MODE_FLAG_NHSYNC);
+
+	/* dynamic_range & colorimetry */
+	vic = drm_match_cea_mode(mode);
+	if ((vic == 6) || (vic == 7) || (vic == 21) || (vic == 22) ||
+	    (vic == 2) || (vic == 3) || (vic == 17) || (vic == 18)) {
+		video_info->dynamic_range = CEA;
+		video_info->ycbcr_coeff = COLOR_YCBCR601;
+	} else if (vic) {
+		video_info->dynamic_range = CEA;
+		video_info->ycbcr_coeff = COLOR_YCBCR709;
+	} else {
+		video_info->dynamic_range = VESA;
+		video_info->ycbcr_coeff = COLOR_YCBCR709;
+	}
+
+	switch (display_info->bpc) {
+	case 12:
+		video_info->color_depth = COLOR_12;
+		break;
+	case 10:
+		video_info->color_depth = COLOR_10;
+		break;
+	case 8:
+		video_info->color_depth = COLOR_8;
+		break;
+	case 6:
+		video_info->color_depth = COLOR_6;
+		break;
+	default:
+		video_info->color_depth = COLOR_8;
+		break;
+	}
+
+	if (display_info->color_formats | DRM_COLOR_FORMAT_YCRCB444)
+		video_info->color_space = COLOR_YCBCR444;
+	else if (display_info->color_formats | DRM_COLOR_FORMAT_YCRCB422)
+		video_info->color_space = COLOR_YCBCR422;
+	else if (display_info->color_formats | DRM_COLOR_FORMAT_RGB444)
+		video_info->color_space = COLOR_RGB;
+	else
+		video_info->color_space = COLOR_RGB;
+
+	/*
+	 * NOTE: those property parseing code is used for
+	 * providing backward compatibility for samsung platform.
+	 */
+	of_property_read_u32(dp_node, "samsung,color-space",
+			     &video_info->color_space);
+	of_property_read_u32(dp_node, "samsung,dynamic-range",
+			     &video_info->dynamic_range);
+	of_property_read_u32(dp_node, "samsung,ycbcr-coeff",
+			     &video_info->ycbcr_coeff);
+	of_property_read_u32(dp_node, "samsung,color-depth",
+			     &video_info->color_depth);
+	of_property_read_u32(dp_node, "hsync-active-high",
+			     (unsigned int *)&video_info->h_sync_polarity);
+	of_property_read_u32(dp_node, "vsync-active-high",
+			     (unsigned int *)&video_info->v_sync_polarity);
+	of_property_read_u32(dp_node, "interlaced",
+			     (unsigned int *)&video_info->interlaced);
+}
+
 static void analogix_dp_bridge_nop(struct drm_bridge *bridge)
 {
 	/* do nothing */
@@ -1091,6 +1167,7 @@ static const struct drm_bridge_funcs analogix_dp_bridge_funcs = {
 	.disable = analogix_dp_bridge_disable,
 	.pre_enable = analogix_dp_bridge_nop,
 	.post_disable = analogix_dp_bridge_nop,
+	.mode_set = analogix_dp_bridge_mode_set,
 	.attach = analogix_dp_bridge_attach,
 };
 
@@ -1121,62 +1198,24 @@ static int analogix_dp_create_bridge(struct drm_device *drm_dev,
 	return 0;
 }
 
-static struct video_info *analogix_dp_dt_parse_pdata(struct device *dev)
+static int analogix_dp_dt_parse_pdata(struct analogix_dp_device *dp)
 {
-	struct device_node *dp_node = dev->of_node;
-	struct video_info *dp_video_config;
-
-	dp_video_config = devm_kzalloc(dev, sizeof(*dp_video_config),
-				       GFP_KERNEL);
-	if (!dp_video_config)
-		return ERR_PTR(-ENOMEM);
-
-	dp_video_config->h_sync_polarity =
-		of_property_read_bool(dp_node, "hsync-active-high");
-
-	dp_video_config->v_sync_polarity =
-		of_property_read_bool(dp_node, "vsync-active-high");
-
-	dp_video_config->interlaced =
-		of_property_read_bool(dp_node, "interlaced");
-
-	if (of_property_read_u32(dp_node, "samsung,color-space",
-				 &dp_video_config->color_space)) {
-		dev_err(dev, "failed to get color-space\n");
-		return ERR_PTR(-EINVAL);
-	}
-
-	if (of_property_read_u32(dp_node, "samsung,dynamic-range",
-				 &dp_video_config->dynamic_range)) {
-		dev_err(dev, "failed to get dynamic-range\n");
-		return ERR_PTR(-EINVAL);
-	}
-
-	if (of_property_read_u32(dp_node, "samsung,ycbcr-coeff",
-				 &dp_video_config->ycbcr_coeff)) {
-		dev_err(dev, "failed to get ycbcr-coeff\n");
-		return ERR_PTR(-EINVAL);
-	}
-
-	if (of_property_read_u32(dp_node, "samsung,color-depth",
-				 &dp_video_config->color_depth)) {
-		dev_err(dev, "failed to get color-depth\n");
-		return ERR_PTR(-EINVAL);
-	}
+	struct device_node *dp_node = dp->dev->of_node;
+	struct video_info *video_config = &dp->video_info;
 
 	if (of_property_read_u32(dp_node, "samsung,link-rate",
-				 &dp_video_config->link_rate)) {
+				 &video_info->link_rate)) {
 		dev_err(dev, "failed to get link-rate\n");
-		return ERR_PTR(-EINVAL);
+		return -EINVAL;
 	}
 
 	if (of_property_read_u32(dp_node, "samsung,lane-count",
-				 &dp_video_config->lane_count)) {
+				 &video_info->lane_count)) {
 		dev_err(dev, "failed to get lane-count\n");
-		return ERR_PTR(-EINVAL);
+		return -EINVAL;
 	}
 
-	return dp_video_config;
+	return 0;
 }
 
 int analogix_dp_bind(struct device *dev, struct drm_device *drm_dev,
@@ -1205,9 +1244,9 @@ int analogix_dp_bind(struct device *dev, struct drm_device *drm_dev,
 	 */
 	dp->plat_data = plat_data;
 
-	dp->video_info = analogix_dp_dt_parse_pdata(&pdev->dev);
-	if (IS_ERR(dp->video_info))
-		return PTR_ERR(dp->video_info);
+	ret = analogix_dp_dt_parse_pdata(dp);
+	if (ret)
+		return ret;
 
 	dp->phy = devm_phy_get(dp->dev, "dp");
 	if (IS_ERR(dp->phy)) {
