@@ -11,11 +11,6 @@
  * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  */
-#include <drm/drmP.h>
-#include <drm/drm_crtc_helper.h>
-#include <drm/drm_panel.h>
-#include <drm/drm_of.h>
-#include <drm/drm_dp_helper.h>
 
 #include <linux/component.h>
 #include <linux/mfd/syscon.h>
@@ -26,6 +21,13 @@
 
 #include <video/of_videomode.h>
 #include <video/videomode.h>
+
+#include <drm/drmP.h>
+#include <drm/drm_crtc.h>
+#include <drm/drm_crtc_helper.h>
+#include <drm/drm_panel.h>
+#include <drm/drm_of.h>
+#include <drm/drm_dp_helper.h>
 
 #include <drm/bridge/analogix_dp.h>
 
@@ -125,19 +127,43 @@ static void rockchip_dp_drm_encoder_mode_set(struct drm_encoder *encoder,
 	/* do nothing */
 }
 
+static drm_connector *rockchip_dp_get_connector(struct rockchip_dp_device *dp)
+{
+	struct drm_connector *connector;
+	struct drm_device *drm_dev = dp->drm_dev;
+
+	drm_for_each_connector(connector, drm_dev) {
+		if (connector->encoder != &dp->encoder)
+			return connector;
+	}
+
+	return NULL;
+}
+
 static void rockchip_dp_drm_encoder_prepare(struct drm_encoder *encoder)
 {
 	struct rockchip_dp_device *dp = encoder_to_dp(encoder);
+	struct drm_connector *connector;
+	int ret = 0;
 	u32 val;
-	int ret;
 
-	ret = rockchip_drm_crtc_mode_config(encoder->crtc,
-					    DRM_MODE_CONNECTOR_eDP,
-					    ROCKCHIP_OUT_MODE_AAAA);
-	if (ret < 0) {
+	connector = rockchip_dp_get_connector(dp);
+	if (!connector) {
+		DRM_ERROR("Failed to get connector by encoder[%p]\n", encoder);
+		return;
+	}
+
+	if (connector->display_info.color_formats | DRM_COLOR_FORMAT_RGB444)
+		ret = rockchip_drm_crtc_mode_config(
+			encoder->crtc, DRM_MODE_CONNECTOR_eDP,
+			connector->display_info.bpc, DRM_COLOR_FORMAT_RGB444);
+	if (!ret) {
 		dev_err(dp->dev, "Could not set crtc mode config: %d.\n", ret);
 		return;
 	}
+
+	connector->display_info.bpc = ret;
+	connector->display_info.color_formats = DRM_COLOR_FORMAT_RGB444;
 
 	ret = rockchip_drm_encoder_get_mux_id(dp->dev->of_node, encoder);
 	if (ret < 0)
