@@ -1,0 +1,26 @@
+Rockchip Soc Seroes Display Port PHY
+------------------------------------
+
+Required properties:
+- compatible : should be one of the following supported values:
+	 - "rockchip.rk3288-dp-phy"
+
+- reg : a list of registers used by phy driver
+- clocks: from common clock binding: handle to dp clock.
+	of memory mapped region.
+- clock-names: from common clock binding:
+	Required elements: "sclk_dp" "sclk_dp_24m"
+
+- rockchip,grf: this soc should set GRF regs, so need get grf here.
+- #phy-cells : from the generic PHY bindings, must be 0;
+
+Example:
+
+edp_phy: phy@ff770274 {
+	compatilble = "rockchip,rk3288-dp-phy";
+	reg = <0xff770274 4>;
+	rockchip,grf = <&grf>;
+	clocks = <&cru SCLK_EDP_24M>;
+	clock-names = "24m";
+	#phy-cells = <0>;
+}
