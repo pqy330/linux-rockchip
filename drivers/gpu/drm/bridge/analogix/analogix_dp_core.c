@@ -1032,8 +1032,10 @@ static int analogix_dp_bridge_attach(struct drm_bridge *bridge)
 
 	drm_connector_helper_add(connector,
 				 &analogix_dp_connector_helper_funcs);
-	drm_connector_register(connector);
 	drm_mode_connector_attach_encoder(connector, encoder);
+
+	if (dp->plat_data && dp->plat_data->dev_type == EXYNOS_DP)
+		drm_connector_register(connector);
 
 	if (dp->plat_data && dp->plat_data->panel) {
 		ret = drm_panel_attach(dp->plat_data->panel, &dp->connector);
@@ -1317,7 +1319,7 @@ int analogix_dp_bind(struct device *dev, struct drm_device *drm_dev,
 		of_property_read_bool(dev->of_node, "analogix,need-force-hpd");
 
 	dp->hpd_gpio = of_get_named_gpio(dev->of_node, "hpd-gpios", 0);
-	if (gpio_is_valid(dp->hpd_gpio))
+	if (!gpio_is_valid(dp->hpd_gpio))
 		dp->hpd_gpio = of_get_named_gpio(dev->of_node,
 						 "samsung,hpd-gpio", 0);
 

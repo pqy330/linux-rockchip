@@ -41,10 +41,6 @@
 		container_of(pd, struct rockchip_dp_device, plat_data)
 
 /* dp grf register offset */
-#define GRF_GPIO7B_IOMUX                        0x0070
-#define GPIO7B3_SEL_MASK                        (0x03 << 6)
-#define GPIO7B3_SEL_EDP_HOTPLUG                 BIT(7)
-
 #define GRF_SOC_CON6                            0x025c
 #define GRF_EDP_LCD_SEL_MASK                    BIT(5)
 #define GRF_EDP_SEL_VOP_LIT                     BIT(5)
@@ -65,16 +61,6 @@ struct rockchip_dp_device {
 
 static int rockchip_dp_pre_init(struct rockchip_dp_device *dp)
 {
-	u32 val;
-	int ret;
-
-	val = GPIO7B3_SEL_EDP_HOTPLUG | (GPIO7B3_SEL_MASK << 16);
-	ret = regmap_write(dp->grf, GRF_GPIO7B_IOMUX, val);
-	if (ret != 0) {
-		dev_err(dp->dev, "Could not config GRF edp hpd: %d\n", ret);
-		return ret;
-	}
-
 	reset_control_assert(dp->rst);
 	usleep_range(10, 20);
 	reset_control_deassert(dp->rst);
@@ -127,7 +113,7 @@ static void rockchip_dp_drm_encoder_mode_set(struct drm_encoder *encoder,
 	/* do nothing */
 }
 
-static drm_connector *rockchip_dp_get_connector(struct rockchip_dp_device *dp)
+static struct drm_connector *rockchip_dp_get_connector(struct rockchip_dp_device *dp)
 {
 	struct drm_connector *connector;
 	struct drm_device *drm_dev = dp->drm_dev;

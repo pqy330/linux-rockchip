@@ -828,7 +828,6 @@ int rockchip_drm_crtc_mode_config(struct drm_crtc *crtc,
 {
 	struct vop *vop = to_vop(crtc);
 	vop->connector_type = connector_type;
-	vop->connector_out_mode = out_mode;
 
 	/*
 	 * RK3288 vop only support RGB Color output.

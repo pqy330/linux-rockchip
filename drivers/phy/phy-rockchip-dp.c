@@ -132,7 +132,7 @@ static int rockchip_dp_phy_probe(struct platform_device *pdev)
 		return ret;
 	}
 
-	phy = devm_phy_create(dev, NULL, &rockchip_dp_phy_ops, NULL);
+	phy = devm_phy_create(dev, np, &rockchip_dp_phy_ops);
 	if (IS_ERR(phy)) {
 		dev_err(dev, "failed to create phy\n");
 		return PTR_ERR(phy);
