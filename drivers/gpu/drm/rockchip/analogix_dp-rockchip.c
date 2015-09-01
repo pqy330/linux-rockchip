@@ -293,6 +293,7 @@ static int rockchip_dp_bind(struct device *dev, struct device *master,
 		return ret;
 	}
 
+	dp->plat_data.dev_type = RK3288_DP;
 	dp->plat_data.attach = NULL;
 	dp->plat_data.get_modes = NULL;
 	dp->plat_data.power_on = rockchip_dp_poweron;
