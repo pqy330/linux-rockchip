@@ -581,8 +581,8 @@ static void rockchip_drm_encoder_prepare(struct drm_encoder *encoder)
 	int ret;
 
 	ret = rockchip_drm_crtc_mode_config(encoder->crtc,
-					    edp->connector.connector_type,
-					    ROCKCHIP_OUT_MODE_AAAA);
+					    DRM_MODE_CONNECTOR_eDP,
+					    10, DRM_COLOR_FORMAT_RGB444);
 	if (ret < 0) {
 		dev_err(edp->dev, "Could not set crtc mode config: %d.\n", ret);
 		return;
